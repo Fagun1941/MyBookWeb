@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (TempData["successa"] != null)
+{
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script type="text/javascript">
+        toastr.success('@TempData["successa"]');
+    </script>
+}
+
+
+<div class="text-center">
+    <h1 class="display-4">Welcome To My WebSide</h1>
+   
+</div>
