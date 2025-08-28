@@ -42,6 +42,15 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedData.Initialize(services);
+}
+
+
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

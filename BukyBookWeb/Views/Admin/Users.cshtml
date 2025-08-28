@@ -1,0 +1,47 @@
+﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+
+            <tr>
+                <td>@user.Email</td>
+                <td>@string.Join(", ", roles)</td>
+                <td>
+                    @if (!roles.Contains("Admin"))
+                    {
+                        <form asp-action="MakeAdmin" method="post" style="display:inline;">
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-success btn-sm">Make Admin</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="RemoveAdmin" method="post" style="display:inline;">
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Remove Admin</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

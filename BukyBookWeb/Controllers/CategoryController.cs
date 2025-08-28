@@ -19,12 +19,12 @@ namespace BukyBookWeb.Controllers
             IEnumerable<Category> objCategoryList = _db.Categories;
             return View(objCategoryList);
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {          
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category category)
@@ -41,7 +41,7 @@ namespace BukyBookWeb.Controllers
 
         }
 
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int? id)
         {
 
@@ -61,6 +61,7 @@ namespace BukyBookWeb.Controllers
             
             return View(categoryFromDb);
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -78,7 +79,7 @@ namespace BukyBookWeb.Controllers
 
         }
 
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int? id)
         {
 
@@ -96,6 +97,7 @@ namespace BukyBookWeb.Controllers
 
             return View(categoryFromDb);
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpPost]
         [ValidateAntiForgeryToken]

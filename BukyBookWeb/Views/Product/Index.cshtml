@@ -1,0 +1,77 @@
+﻿@model IEnumerable<BukyBookWeb.Models.Product>
+
+<div class="row pt-4 mb-2">
+    <div class="col-6">
+        <h2 class="text-primary">Product</h2>
+    </div>
+
+    @{
+        if (User.IsInRole("Admin"))
+        {
+            <div class="col-6 text-end">
+                <a asp-controller="Product" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> &nbsp; Create New Product
+                </a>
+            </div>
+        }
+    }
+    
+</div>
+
+<input type="text" id="searchInput" class="form-control mb-2" placeholder="Search Products..." >
+
+<div id="productList" class="container mt-4">
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-3 mb-4 product-card">
+                <div class="card h-100 shadow-sm">
+
+                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Title" style="height:200px; object-fit:cover;" />
+
+                    <div class="card-body text-center">
+
+                        <h5 class="card-title">@item.Title</h5>
+
+                        <p class="card-text text-success fw-bold">$@item.Price.ToString("0.00")</p>
+
+                        <div class="d-flex justify-content-between">
+                           
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                View Details
+                            </a>
+
+                            <form asp-controller="Home" asp-action="NewFeature" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-success btn-sm">Add to Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<script>
+    // Get references
+    const searchInput = document.getElementById('searchInput');
+    const productCards = document.querySelectorAll('.product-card');
+
+    // Listen for input event
+    searchInput.addEventListener('input', function() {
+        const filter = searchInput.value.toLowerCase();
+
+        productCards.forEach(card => {
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            if (title.includes(filter)) {
+                card.style.display = 'block'; // show matching
+            } else {
+                card.style.display = 'none'; // hide non-matching
+            }
+        });
+    });
+</script>
+
+
