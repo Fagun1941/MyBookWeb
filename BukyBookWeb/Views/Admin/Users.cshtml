@@ -9,39 +9,41 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Email</th>
-            <th>Roles</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            var roles = await UserManager.GetRolesAsync(user);
 
-            <tr>
-                <td>@user.Email</td>
-                <td>@string.Join(", ", roles)</td>
-                <td>
+<div class="grid-container">
+    <div class="grid-row header">
+        <div class="grid-col col-name">Email</div>
+        <div class="grid-col col-name">Role</div>
+        <div class="grid-col col-actions">Actions</div>
+    </div>
+
+
+    @foreach (var obj in Model)
+    {
+
+        var roles = await UserManager.GetRolesAsync(obj);
+        <div class="grid-row">
+            <div class="grid-col col-name">@obj.Email</div>
+            <div class="grid-col col-name">@string.Join(", ", roles)</div>
+            <div class="grid-col col-actions text-center">
+                <div class="btn-group" role="group">
                     @if (!roles.Contains("Admin"))
                     {
                         <form asp-action="MakeAdmin" method="post" style="display:inline;">
-                            <input type="hidden" name="userId" value="@user.Id" />
+                            <input type="hidden" name="userId" value="@obj.Id" />
                             <button type="submit" class="btn btn-success btn-sm">Make Admin</button>
                         </form>
                     }
                     else
                     {
                         <form asp-action="RemoveAdmin" method="post" style="display:inline;">
-                            <input type="hidden" name="userId" value="@user.Id" />
+                            <input type="hidden" name="userId" value="@obj.Id" />
                             <button type="submit" class="btn btn-danger btn-sm">Remove Admin</button>
                         </form>
                     }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+
+                </div>
+            </div>
+        </div>
+    }
+</div>
