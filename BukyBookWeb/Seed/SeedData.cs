@@ -13,7 +13,7 @@ namespace BukyBookWeb.Data
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-            // 1️⃣ Define roles
+            // Define roles
             string[] roleNames = { "Admin", "User" };
 
             foreach (var roleName in roleNames)
@@ -27,9 +27,9 @@ namespace BukyBookWeb.Data
                 }
             }
 
-            // 2️⃣ Create default admin user
+            // Create default admin user
             var adminEmail = "admin@bookstore.com";
-            var adminPassword = "Admin@123"; // ⚠️ Change for production
+            var adminPassword = "Admin@123";
 
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 

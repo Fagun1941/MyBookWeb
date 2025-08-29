@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace BukyBookWeb.Controllers
 {
-    [Authorize(Roles = "Admin")] // Only Admin can access
+    [Authorize(Roles = "Admin")] 
     public class AdminController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
