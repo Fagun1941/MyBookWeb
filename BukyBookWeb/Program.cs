@@ -27,8 +27,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
 
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -65,7 +63,6 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     await SeedData.Initialize(services);
 }
-
 
 app.MapControllerRoute(
     name: "default",
