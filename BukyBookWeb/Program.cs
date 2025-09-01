@@ -1,7 +1,11 @@
 using BukyBookWeb.Data;
+using BukyBookWeb.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddDbContext<SecondDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SecondConnection")));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
@@ -42,13 +46,25 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context1 = services.GetRequiredService<ApplicationDbContext>();
+    var context2 = services.GetRequiredService<SecondDbContext>();
+
+  
+    context1.Database.EnsureCreated();
+    context2.Database.EnsureCreated();
+
+    await SeedData.Initialize(services);
+}
 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await SeedData.Initialize(services);
 }
-
 
 
 app.MapControllerRoute(

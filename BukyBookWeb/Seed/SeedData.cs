@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BukyBookWeb.Models;  // ✅ import ApplicationUser
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace BukyBookWeb.Data
         {
             // Get RoleManager and UserManager from service provider
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>(); // ✅ use ApplicationUser
 
             // Define roles
             string[] roleNames = { "Admin", "User" };
@@ -35,11 +36,12 @@ namespace BukyBookWeb.Data
 
             if (adminUser == null)
             {
-                var newAdmin = new IdentityUser
+                var newAdmin = new ApplicationUser   // ✅ use ApplicationUser
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    Name = "Super Admin"  // ✅ you can set the custom Name field
                 };
 
                 var result = await userManager.CreateAsync(newAdmin, adminPassword);
