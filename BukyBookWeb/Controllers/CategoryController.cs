@@ -14,9 +14,10 @@ namespace BukyBookWeb.Controllers
         }
 
         // Show all categories
-        public IActionResult Index()
+        public IActionResult Index(string search)
         {
-            var categories = _categoryService.GetAll();
+            ViewData["CurrentFilter"] = search ?? "";
+            var categories = _categoryService.GetAll(search);
             return View(categories);
         }
 

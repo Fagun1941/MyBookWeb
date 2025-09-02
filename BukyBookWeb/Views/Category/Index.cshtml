@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Category>
+﻿@using Azure.Core
+@model IEnumerable<Category>
 
 @{
     ViewData["Title"] = "Index";
@@ -11,32 +12,29 @@
         <div class="col-6">
             <h2 class="text-primary">Category List</h2>
         </div>
-        @{
-            if (User.IsInRole("Admin"))
-            {
-                <div class="col-6 text-end">
-                    <a asp-controller="Category" asp-action="Create" class="btn btn-primary">
-                         <i class="bi bi-plus-circle"></i> &nbsp; Create New Category
-                    </a>
-                </div> 
-            }
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-6 text-end">
+                <a asp-controller="Category" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> &nbsp; Create New Category
+                </a>
+            </div> 
         }
     </div>
 
-  
-    <input type="text" id="searchInput" class="form-control mb-2" placeholder="Search categories...">
+    <!-- Server-side search form -->
+    <input type="text" name="search" value="@(ViewData["CurrentFilter"])"
+           class="form-control" placeholder="Search categories..." />
 
-    
+
+
     <div id="categoryGrid" class="grid-container">
-       
         <div class="grid-row header">
             <div class="grid-col col-name">Category Name</div>
             <div class="grid-col col-order">Display Order</div>
             <div class="grid-col col-actions text-center">Actions</div>
-          
         </div>
 
-      
         @foreach (var obj in Model)
         {
             <div class="grid-row">
@@ -44,36 +42,18 @@
                 <div class="grid-col col-order">@obj.DisplayOrder</div>
                 <div class="grid-col col-actions text-center">
                     <div class="btn-group" role="group">
-                        @{
-                            if (User.IsInRole("Admin"))
-                            {
-                                <a asp-controller="Category" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-pencil-square"></i> Edit
-                                </a>
-                                <a asp-controller="Category" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger btn-sm">
-                                    <i class="bi bi-trash"></i> Delete
-                                </a>
-                            }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Category" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary btn-sm">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a asp-controller="Category" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger btn-sm">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
                         }
-                       
                     </div>
                 </div>
             </div>
         }
     </div>
 </div>
-
-
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-
-<script>
-    $(document).ready(function(){
-        $("#searchInput").on("keyup", function() {
-            var value = $(this).val().toLowerCase();
-            $("#categoryGrid .grid-row").not(".header").filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-            });
-        });
-    });
-</script>
