@@ -1,5 +1,6 @@
 using BukyBookWeb.Data;
 using BukyBookWeb.Models;
+using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -26,6 +27,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login"; 
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
+
+builder.Services.AddScoped<CategoryService>();
 
 var app = builder.Build();
 
