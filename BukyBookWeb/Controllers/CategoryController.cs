@@ -1,118 +1,82 @@
-﻿using BukyBookWeb.Data;
-using BukyBookWeb.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using BukyBookWeb.Models;
+using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BukyBookWeb.Controllers
 {
-    [Authorize]
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext _db;
+        private readonly CategoryService _categoryService;
 
-        public CategoryController(ApplicationDbContext db)
+        public CategoryController(CategoryService categoryService)
         {
-            _db = db;
+            _categoryService = categoryService;
         }
+
+        // Show all categories
         public IActionResult Index()
         {
-            IEnumerable<Category> objCategoryList = _db.Categories;
-            return View(objCategoryList);
+            var categories = _categoryService.GetAll();
+            return View(categories);
         }
-        [Authorize(Roles = "Admin")]
+
+        // Details by Id
+        public IActionResult Details(int id)
+        {
+            var category = _categoryService.GetById(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+        // Add GET
         public IActionResult Create()
-        {          
+        {
             return View();
         }
-        [Authorize(Roles = "Admin")]
+
+        // Add POST
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Create(Category category)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                _db.Categories.Add(category);
-                _db.SaveChanges();
-                TempData["Success"] = "Category Create Successfully";
-                return RedirectToAction("index");
-              
+                _categoryService.Add(category);
+                return RedirectToAction(nameof(Index));
             }
-            return View();
-
+            return View(category);
         }
 
-        [Authorize(Roles = "Admin")]
-        public IActionResult Edit(int? id)
+        // Edit GET
+        public IActionResult Edit(int id)
         {
-
-            if(id == null || id == 0)
+            var category = _categoryService.GetById(id);
+            if (category == null)
             {
                 return NotFound();
             }
-
-            var categoryFromDb = _db.Categories.Find(id);
-
-            if(categoryFromDb == null)
-            {
-                return NotFound();
-            }
-
-
-            
-            return View(categoryFromDb);
+            return View(category);
         }
-        [Authorize(Roles = "Admin")]
 
+        // Edit POST
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Edit(Category category)
         {
             if (ModelState.IsValid)
             {
-                _db.Categories.Update(category);
-                _db.SaveChanges();
-                TempData["Success"] = "Category Edit Successfully";
-                return RedirectToAction("index");
-
+                _categoryService.Update(category);
+                return RedirectToAction(nameof(Index));
             }
-            return View();
-
+            return View(category);
         }
 
-        [Authorize(Roles = "Admin")]
-        public IActionResult Delete(int? id)
+        // Delete
+        public IActionResult Delete(int id)
         {
-
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-
-            var categoryFromDb = _db.Categories.Find(id);
-
-            if (categoryFromDb == null)
-            {
-                return NotFound();
-            }
-
-            return View(categoryFromDb);
-        }
-        [Authorize(Roles = "Admin")]
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
-        {
-            var categoryFromDb = _db.Categories.Find(id);
-            if (categoryFromDb == null)
-            {
-                return NotFound();
-            }
-            _db.Remove(categoryFromDb);
-            _db.SaveChanges();
-            TempData["Success"] = "Category Delete Successfully";
-            return RedirectToAction("Index");
-
+            _categoryService.Delete(id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }
