@@ -14,9 +14,12 @@ namespace BukyBookWeb.Services
         }
 
 
-        public IEnumerable<Category> GetAll()
+        public IEnumerable<Category> GetAll(string search)
         {
-            return _context.Categories.ToList();
+            var categories = string.IsNullOrEmpty(search)
+            ? _context.Categories.ToList() 
+            : _context.Categories.Where(c => c.Name.Contains(search)).ToList();
+            return categories;
         }
         public Category GetById(int id)
         {
