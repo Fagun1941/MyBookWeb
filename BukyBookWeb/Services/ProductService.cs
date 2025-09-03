@@ -1,59 +1,67 @@
-﻿using BukyBookWeb.Data;
-using BukyBookWeb.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using BukyBookWeb.Models;
+using BukyBookWeb.Repositories;
 
 namespace BukyBookWeb.Services
 {
     public class ProductService
     {
-        private readonly ApplicationDbContext _db;
+        private readonly ProductRepository _repository;
+        private readonly string _imageFolder;
 
-        public ProductService(ApplicationDbContext db)
+        public ProductService(ProductRepository repository)
         {
-            _db = db;
+            _repository = repository;
+            _imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
+            if (!Directory.Exists(_imageFolder))
+                Directory.CreateDirectory(_imageFolder);
         }
 
-        // Get all products with categories
         public IEnumerable<Product> GetAll()
         {
-            return _db.Products.Include(p => p.Category).ToList();
+            return _repository.GetAll();
         }
 
-        // Get product by Id with category
         public Product GetById(int id)
         {
-            return _db.Products.Include(p => p.Category).FirstOrDefault(p => p.Id == id);
+            return _repository.GetById(id);
         }
 
-        // Add product
-        public void Add(Product product)
+        public void Add(Product product, IFormFile? file)
         {
-            _db.Products.Add(product);
-            _db.SaveChanges();
+            HandleFileUpload(product, file);
+            _repository.Add(product);
         }
 
-        // Update product
-        public void Update(Product product)
+        public void Update(Product product, IFormFile? file)
         {
-            _db.Products.Update(product);
-            _db.SaveChanges();
+            HandleFileUpload(product, file);
+            _repository.Update(product);
         }
 
-        // Delete product
         public void Delete(int id)
         {
-            var product = _db.Products.Find(id);
-            if (product != null)
-            {
-                _db.Products.Remove(product);
-                _db.SaveChanges();
-            }
+            _repository.Delete(id);
         }
 
-        // Get all categories for dropdown
         public IEnumerable<Category> GetCategories()
         {
-            return _db.Categories.ToList();
+            return _repository.GetCategories();
+        }
+
+        // Private helper to handle image upload
+        private void HandleFileUpload(Product product, IFormFile? file)
+        {
+            if (file == null || file.Length == 0) return;
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(_imageFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+            }
+
+            product.ImageUrl = "/images/products/" + fileName;
         }
     }
 }

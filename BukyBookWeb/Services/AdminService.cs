@@ -1,42 +1,42 @@
 ﻿using BukyBookWeb.Models;
-using Microsoft.AspNetCore.Identity;
+using BukyBookWeb.Repositories;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BukyBookWeb.Services
 {
     public class AdminService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly AdminRepository _repository;
 
-        public AdminService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminService(AdminRepository repository)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
+            _repository = repository;
         }
 
+        // Get all users
         public List<ApplicationUser> GetAllUsers()
         {
-            return _userManager.Users.ToList();
+            return _repository.GetAllUsers();
         }
 
+        // Make user Admin
         public async Task AddAdminRoleAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null && !await _userManager.IsInRoleAsync(user, "Admin"))
+            var user = await _repository.FindByIdAsync(userId);
+            if (user != null)
             {
-                await _userManager.AddToRoleAsync(user, "Admin");
+                await _repository.AddAdminRoleAsync(user);
             }
         }
 
+        // Remove Admin role
         public async Task RemoveAdminRoleAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+            var user = await _repository.FindByIdAsync(userId);
+            if (user != null)
             {
-                await _userManager.RemoveFromRoleAsync(user, "Admin");
+                await _repository.RemoveAdminRoleAsync(user);
             }
         }
     }
