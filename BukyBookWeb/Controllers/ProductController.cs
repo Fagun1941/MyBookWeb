@@ -35,25 +35,32 @@ namespace BukyBookWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (file != null && file.Length > 0)
-                {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
+                _productService.Add(product, file);
+                return RedirectToAction(nameof(Index));
+            }
 
-                    if (!Directory.Exists(uploadPath))
-                        Directory.CreateDirectory(uploadPath);
+            ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
+            return View(product);
+        }
 
-                    var filePath = Path.Combine(uploadPath, fileName);
+        [Authorize(Roles = "Admin")]
+        public IActionResult Edit(int id)
+        {
+            var product = _productService.GetById(id);
+            if (product == null) return NotFound();
 
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        file.CopyTo(stream);
-                    }
+            ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
+            return View(product);
+        }
 
-                    product.ImageUrl = "/images/products/" + fileName;
-                }
-
-                _productService.Add(product);
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Product product, IFormFile? file)
+        {
+            if (ModelState.IsValid)
+            {
+                _productService.Update(product, file);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -62,14 +69,19 @@ namespace BukyBookWeb.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(int Id)
+        public IActionResult Details(int id)
         {
-            var product = _productService.GetById(Id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            var product = _productService.GetById(id);
+            if (product == null) return NotFound();
             return View(product);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            _productService.Delete(id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,46 +1,46 @@
-﻿using BukyBookWeb.Data;
-using BukyBookWeb.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using BukyBookWeb.Models;
+using BukyBookWeb.Repositories;
 
 namespace BukyBookWeb.Services
 {
     public class CategoryService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CategoryRepository _repository;
 
-        public CategoryService (ApplicationDbContext context)
+        public CategoryService(CategoryRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
+        public IEnumerable<Category> GetAllCategory(string search)
+        {
+            var categories = _repository.GetAllCategory(search);
+            
+            return categories.OrderBy(c => int.TryParse(c.DisplayOrder, out var num) ? num : int.MaxValue);
+            ;
+        }
 
-        public IEnumerable<Category> GetAll(string search)
+        public Category GetByIdCategory(int id)
         {
-            var categories = string.IsNullOrEmpty(search)
-            ? _context.Categories.ToList() 
-            : _context.Categories.Where(c => c.Name.Contains(search)).ToList();
-            return categories;
+            return _repository.GetByIdCategory(id);
         }
-        public Category GetById(int id)
+
+        public void AddCategory(Category category)
         {
-            return _context.Categories.Find(id);
+            if (string.IsNullOrWhiteSpace(category.Name))
+                throw new ArgumentException("Category name cannot be empty.");
+
+            _repository.AddCategory(category);
         }
-        public void Add(Category category) { 
-            _context.Categories.Add(category);
-            _context.SaveChanges(); 
-        }
-        public void Update(Category category) { 
-            _context.Categories.Update(category); 
-            _context.SaveChanges();
-        }
-        public void Delete(int id)
+
+        public void UpdateCategory(Category category)
         {
-            var category = _context.Categories.Find(id);
-            if (category != null)
-            {
-                _context.Categories.Remove(category);
-                _context.SaveChanges();
-            }
+            _repository.UpdateCategory(category);
+        }
+
+        public void DeleteCategory(int id)
+        {
+            _repository.DeleteCategory(id);
         }
     }
 }

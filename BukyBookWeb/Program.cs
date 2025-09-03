@@ -1,5 +1,6 @@
 using BukyBookWeb.Data;
 using BukyBookWeb.Models;
+using BukyBookWeb.Repositories;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -28,10 +29,14 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
 
+builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<AdminService>();
+builder.Services.AddScoped<AdminRepository>();
 
 var app = builder.Build();
 
@@ -47,7 +52,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())

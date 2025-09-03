@@ -17,14 +17,14 @@ namespace BukyBookWeb.Controllers
         public IActionResult Index(string search)
         {
             ViewData["CurrentFilter"] = search ?? "";
-            var categories = _categoryService.GetAll(search);
+            var categories = _categoryService.GetAllCategory(search);
             return View(categories);
         }
 
         // Details by Id
         public IActionResult Details(int id)
         {
-            var category = _categoryService.GetById(id);
+            var category = _categoryService.GetByIdCategory(id);
             if (category == null)
             {
                 return NotFound();
@@ -44,7 +44,7 @@ namespace BukyBookWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _categoryService.Add(category);
+                _categoryService.AddCategory(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -53,7 +53,7 @@ namespace BukyBookWeb.Controllers
         // Edit GET
         public IActionResult Edit(int id)
         {
-            var category = _categoryService.GetById(id);
+            var category = _categoryService.GetByIdCategory(id);
             if (category == null)
             {
                 return NotFound();
@@ -67,7 +67,7 @@ namespace BukyBookWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _categoryService.Update(category);
+                _categoryService.UpdateCategory(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -76,7 +76,7 @@ namespace BukyBookWeb.Controllers
         // Delete
         public IActionResult Delete(int id)
         {
-            _categoryService.Delete(id);
+            _categoryService.DeleteCategory(id);
             return RedirectToAction(nameof(Index));
         }
     }
