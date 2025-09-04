@@ -22,9 +22,10 @@
         }
     </div>
 
-    <!-- Server-side search form -->
-    <input type="text" name="search" value="@(ViewData["CurrentFilter"])"
-           class="form-control" placeholder="Search categories..." />
+    <form asp-controller="Category" asp-action="Index" method="get" class="d-flex">
+        <input type="text" name="search" class="form-control" placeholder="Search by Categoryname" value="@Context.Request.Query["search"]">
+        <button type="submit" class="btn btn-outline-primary ms-2">Search</button>
+    </form>
 
 
 

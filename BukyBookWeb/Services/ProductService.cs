@@ -16,31 +16,37 @@ namespace BukyBookWeb.Services
                 Directory.CreateDirectory(_imageFolder);
         }
 
-        public IEnumerable<Product> GetAll()
+        public IEnumerable<Product> GetAllProduct(string search)
         {
-            return _repository.GetAll();
+             var products = _repository.GetAllProduct();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                products = products
+                    .Where(c => c.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+            return products;
         }
 
-        public Product GetById(int id)
+        public Product GetByIdProduct(int id)
         {
-            return _repository.GetById(id);
+            return _repository.GetByIdProduct(id);
         }
 
-        public void Add(Product product, IFormFile? file)
+        public void AddProduct(Product product, IFormFile? file)
         {
             HandleFileUpload(product, file);
-            _repository.Add(product);
+            _repository.AddProduct(product);
         }
 
-        public void Update(Product product, IFormFile? file)
+        public void UpdateProduct(Product product, IFormFile? file)
         {
             HandleFileUpload(product, file);
-            _repository.Update(product);
+            _repository.UpdateProduct(product);
         }
 
-        public void Delete(int id)
+        public void DeleteProduct(int id)
         {
-            _repository.Delete(id);
+            _repository.DeleteProduct(id);
         }
 
         public IEnumerable<Category> GetCategories()
@@ -48,7 +54,6 @@ namespace BukyBookWeb.Services
             return _repository.GetCategories();
         }
 
-        // Private helper to handle image upload
         private void HandleFileUpload(Product product, IFormFile? file)
         {
             if (file == null || file.Length == 0) return;
