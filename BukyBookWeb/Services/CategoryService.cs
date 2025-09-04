@@ -14,11 +14,17 @@ namespace BukyBookWeb.Services
 
         public IEnumerable<Category> GetAllCategory(string search)
         {
-            var categories = _repository.GetAllCategory(search);
-            
+            var categories = _repository.GetAllCategory();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                categories = categories
+                    .Where(c => c.Name.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
             return categories.OrderBy(c => int.TryParse(c.DisplayOrder, out var num) ? num : int.MaxValue);
-            ;
         }
+
 
         public Category GetByIdCategory(int id)
         {

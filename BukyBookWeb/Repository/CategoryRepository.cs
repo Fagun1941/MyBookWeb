@@ -12,11 +12,9 @@ namespace BukyBookWeb.Repositories
             _context = context;
         }
 
-        public IEnumerable<Category> GetAllCategory(string search)
+        public IEnumerable<Category> GetAllCategory()
         {
-            return string.IsNullOrEmpty(search)
-                ? _context.Categories.ToList()
-                : _context.Categories.Where(c => c.Name.Contains(search)).ToList();
+            return _context.Categories.ToList();
         }
 
         public Category GetByIdCategory(int id)

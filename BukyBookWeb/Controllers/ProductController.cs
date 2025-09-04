@@ -15,9 +15,9 @@ namespace BukyBookWeb.Controllers
             _productService = productService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string search)
         {
-            var products = _productService.GetAll();
+            var products = _productService.GetAllProduct(search);
             return View(products);
         }
 
@@ -35,7 +35,7 @@ namespace BukyBookWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _productService.Add(product, file);
+                _productService.AddProduct(product, file);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -44,9 +44,9 @@ namespace BukyBookWeb.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult Edit(int id)
+        public IActionResult EditProduct(int id)
         {
-            var product = _productService.GetById(id);
+            var product = _productService.GetByIdProduct(id);
             if (product == null) return NotFound();
 
             ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
@@ -60,7 +60,7 @@ namespace BukyBookWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _productService.Update(product, file);
+                _productService.UpdateProduct(product, file);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -71,7 +71,7 @@ namespace BukyBookWeb.Controllers
         [HttpGet]
         public IActionResult Details(int id)
         {
-            var product = _productService.GetById(id);
+            var product = _productService.GetByIdProduct(id);
             if (product == null) return NotFound();
             return View(product);
         }
@@ -80,7 +80,7 @@ namespace BukyBookWeb.Controllers
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            _productService.Delete(id);
+            _productService.DeleteProduct(id);
             return RedirectToAction(nameof(Index));
         }
     }

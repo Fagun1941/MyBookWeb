@@ -13,29 +13,29 @@ namespace BukyBookWeb.Repositories
             _db = db;
         }
 
-        public IEnumerable<Product> GetAll()
+        public IEnumerable<Product> GetAllProduct()
         {
             return _db.Products.Include(p => p.Category).ToList();
         }
 
-        public Product GetById(int id)
+        public Product GetByIdProduct(int id)
         {
             return _db.Products.Include(p => p.Category).FirstOrDefault(p => p.Id == id);
         }
 
-        public void Add(Product product)
+        public void AddProduct(Product product)
         {
             _db.Products.Add(product);
             _db.SaveChanges();
         }
 
-        public void Update(Product product)
+        public void UpdateProduct(Product product)
         {
             _db.Products.Update(product);
             _db.SaveChanges();
         }
 
-        public void Delete(int id)
+        public void DeleteProduct(int id)
         {
             var product = _db.Products.Find(id);
             if (product != null)
