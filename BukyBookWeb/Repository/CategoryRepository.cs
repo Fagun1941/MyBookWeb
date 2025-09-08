@@ -1,9 +1,10 @@
 ﻿using BukyBookWeb.Data;
+using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
 
 namespace BukyBookWeb.Repositories
 {
-    public class CategoryRepository
+    public class CategoryRepository : ICategoryRepository
     {
         private readonly ApplicationDbContext _context;
 
@@ -12,17 +13,27 @@ namespace BukyBookWeb.Repositories
             _context = context;
         }
 
-        public IEnumerable<Category> GetAllCategory()
+        public IEnumerable<Category> GetAllCategory(string search,int page, int pageSize)
         {
-            return _context.Categories.ToList();
+            var query = _context.Categories.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c => c.Name.ToLower().Contains(search.ToLower()));
+            }
+
+            return query.OrderBy(p => p.Id)
+                        .Skip((page - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
             //return DummyData.Categories;
 
         }
 
         public Category GetByIdCategory(int id)
         {
-            //return _context.Categories.Find(id);
-            return DummyData.Categories.FirstOrDefault(c => c.Id == id);
+            return _context.Categories.Find(id);
+            //return DummyData.Categories.FirstOrDefault(c => c.Id == id);
         }
 
         public void AddCategory(Category category)
@@ -61,5 +72,16 @@ namespace BukyBookWeb.Repositories
             //    DummyData.Categories.Remove(category);
             //}
         }
+        public int GetTotalCategoriesCount(string search)
+        {
+            if (string.IsNullOrEmpty(search))
+            {
+                return _context.Categories.Count();
+            }
+            return _context.Categories
+                          .Where(c => c.Name.Contains(search))
+                          .Count();
+        }
+
     }
 }

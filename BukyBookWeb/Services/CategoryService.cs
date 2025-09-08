@@ -1,20 +1,21 @@
-﻿using BukyBookWeb.Models;
+﻿using BukyBookWeb.IRepository;
+using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
 
 namespace BukyBookWeb.Services
 {
-    public class CategoryService
+    public class CategoryService : ICategoryService
     {
-        private readonly CategoryRepository _repository;
+        private readonly ICategoryRepository _repository;
 
-        public CategoryService(CategoryRepository repository)
+        public CategoryService(ICategoryRepository repository)
         {
             _repository = repository;
         }
 
-        public IEnumerable<Category> GetAllCategory(string search)
+        public IEnumerable<Category> GetAllCategory(string search, int page, int pageSize)
         {
-            var categories = _repository.GetAllCategory();
+            var categories = _repository.GetAllCategory(search,page,pageSize);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -47,6 +48,13 @@ namespace BukyBookWeb.Services
         public void DeleteCategory(int id)
         {
             _repository.DeleteCategory(id);
+        }
+
+        public int GetTotalCount(string search)
+        {
+            var categoryCount = _repository.GetTotalCategoriesCount(search);
+
+            return categoryCount;
         }
     }
 }

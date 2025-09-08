@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BukyBookWeb.Repositories
 {
-    public class AccountRepository
+    public class AccountRepository : IAccountRepository
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;

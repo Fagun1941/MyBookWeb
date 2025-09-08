@@ -1,4 +1,5 @@
 using BukyBookWeb.Data;
+using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
 using BukyBookWeb.Services;
@@ -27,14 +28,14 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
 
-builder.Services.AddScoped<CategoryRepository>();
-builder.Services.AddScoped<CategoryService>();
-builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<ProductRepository>();
-builder.Services.AddScoped<AccountService>();
-builder.Services.AddScoped<AccountRepository>();
-builder.Services.AddScoped<AdminService>();
-builder.Services.AddScoped<AdminRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService,CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductRepository,ProductRepository>();
+builder.Services.AddScoped<IAccountService,AccountService>();
+builder.Services.AddScoped<IAccountRepository,AccountRepository>();
+builder.Services.AddScoped<IAdminService,AdminService>();
+builder.Services.AddScoped<IAdminRepository,AdminRepository>();
 
 //builder.Services.AddTransient<CategoryRepository>();
 //builder.Services.AddTransient<CategoryService>();

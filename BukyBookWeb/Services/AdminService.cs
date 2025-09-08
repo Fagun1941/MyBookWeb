@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace BukyBookWeb.Services
 {
-    public class AdminService
+    public class AdminService : IAdminService
     {
-        private readonly AdminRepository _repository;
+        private readonly IAdminRepository _repository;
 
-        public AdminService(AdminRepository repository)
+        public AdminService(IAdminRepository repository)
         {
             _repository = repository;
         }

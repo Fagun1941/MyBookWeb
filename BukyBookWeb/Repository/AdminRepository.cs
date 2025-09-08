@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BukyBookWeb.Repositories
 {
-    public class AdminRepository
+    public class AdminRepository : IAdminRepository
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;

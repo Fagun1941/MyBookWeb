@@ -3,12 +3,12 @@ using BukyBookWeb.Repositories;
 
 namespace BukyBookWeb.Services
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
-        private readonly ProductRepository _repository;
+        private readonly IProductRepository _repository;
         private readonly string _imageFolder;
 
-        public ProductService(ProductRepository repository)
+        public ProductService(IProductRepository repository)
         {
             _repository = repository;
             _imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
@@ -16,9 +16,9 @@ namespace BukyBookWeb.Services
                 Directory.CreateDirectory(_imageFolder);
         }
 
-        public IEnumerable<Product> GetAllProduct(string search)
+        public IEnumerable<Product> GetAllProduct(string search, int page , int pageSize)
         {
-             var products = _repository.GetAllProduct();
+             var products = _repository.GetAllProduct(search, page, pageSize);
             if (!string.IsNullOrWhiteSpace(search))
             {
                 products = products
@@ -67,6 +67,15 @@ namespace BukyBookWeb.Services
             }
 
             product.ImageUrl = "/images/products/" + fileName;
+        }
+
+      
+
+        public int GetTotalCountProduct(string search)
+        {
+            var productCount = _repository.GetTotalProductCount(search);
+
+            return productCount;
         }
     }
 }
