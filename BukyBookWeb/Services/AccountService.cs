@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace BukyBookWeb.Services
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
-        private readonly AccountRepository _repository;
+        private readonly IAccountRepository _repository;
 
-        public AccountService(AccountRepository repository)
+        public AccountService(IAccountRepository repository)
         {
             _repository = repository;
         }

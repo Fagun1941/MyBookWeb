@@ -8,16 +8,22 @@ namespace BukyBookWeb.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ProductService _productService;
+        private readonly IProductService _productService;
 
-        public ProductController(ProductService productService)
+        public ProductController(IProductService productService)
         {
             _productService = productService;
         }
 
-        public IActionResult Index(string search)
+        public IActionResult Index(string search, int page = 1)
         {
-            var products = _productService.GetAllProduct(search);
+            int pageSize = 3;
+            var products = _productService.GetAllProduct(search,page,pageSize);
+            int totalProducts = _productService.GetTotalCountProduct(search);
+            ViewBag.PageNumber = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+            ViewBag.Search = search;
             return View(products);
         }
 

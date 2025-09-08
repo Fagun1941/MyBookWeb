@@ -6,16 +6,24 @@ namespace BukyBookWeb.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly CategoryService _categoryService;
+        private readonly ICategoryService _categoryService;
 
-        public CategoryController(CategoryService categoryService)
+        public CategoryController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
-        public IActionResult Index(string search)
+        public IActionResult Index(string search, int page = 1)
         {
-           
-            var categories = _categoryService.GetAllCategory(search);
+            int pageSize = 3;
+            var categories = _categoryService.GetAllCategory(search,page, pageSize);
+
+            int totalCategories = _categoryService.GetTotalCount(search);
+            ViewBag.PageNumber = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
+
+
+            ViewBag.Search = search;
             return View(categories);
         }
    

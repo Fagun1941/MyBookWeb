@@ -1,33 +1,29 @@
-﻿@using Azure.Core
-@model IEnumerable<Category>
+﻿@model IEnumerable<Category>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Category List";
+    int currentPage = ViewBag.PageNumber;
+    int totalPages = ViewBag.TotalPages;
+    string search = ViewBag.Search;
 }
-
-<partial name="_Notification" />
-
-<div class="container p-1">
-    <div class="row pt-4 mb-2">
-        <div class="col-6">
-            <h2 class="text-primary">Category List</h2>
-        </div>
-        @if (User.IsInRole("Admin"))
-        {
-            <div class="col-6 text-end">
-                <a asp-controller="Category" asp-action="Create" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> &nbsp; Create New Category
-                </a>
-            </div> 
-        }
+<div class="row pt-4 mb-2">
+    <div class="col-6">
+        <h2 class="text-primary">Category List</h2>
     </div>
-
-    <form asp-controller="Category" asp-action="Index" method="get" class="d-flex">
-        <input type="text" name="search" class="form-control" placeholder="Search by Categoryname" value="@Context.Request.Query["search"]">
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-6 text-end">
+            <a asp-controller="Category" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> &nbsp; Create New Category
+            </a>
+        </div>
+    }
+</div>
+<div class="container p-1">
+    <form asp-controller="Category" asp-action="Index" method="get" class="d-flex mb-3">
+        <input type="text" name="search" class="form-control" placeholder="Search by Categoryname" value="@search">
         <button type="submit" class="btn btn-outline-primary ms-2">Search</button>
     </form>
-
-
 
     <div id="categoryGrid" class="grid-container">
         <div class="grid-row header">
@@ -46,10 +42,10 @@
                         @if (User.IsInRole("Admin"))
                         {
                             <a asp-controller="Category" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary btn-sm">
-                                <i class="bi bi-pencil-square"></i> Edit
+                                Edit
                             </a>
                             <a asp-controller="Category" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger btn-sm">
-                                <i class="bi bi-trash"></i> Delete
+                                Delete
                             </a>
                         }
                     </div>
@@ -57,4 +53,23 @@
             </div>
         }
     </div>
+
+    <nav aria-label="Page navigation" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { search = search, page = currentPage - 1 })">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(currentPage == i ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { search = search, page = i })">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { search = search, page = currentPage + 1 })">Next</a>
+            </li>
+        </ul>
+    </nav>
 </div>
