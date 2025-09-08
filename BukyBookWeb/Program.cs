@@ -16,8 +16,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefultConnection")
     ));
-builder.Services.AddDbContext<SecondDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SecondConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -37,6 +35,15 @@ builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountRepository>();
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<AdminRepository>();
+
+//builder.Services.AddTransient<CategoryRepository>();
+//builder.Services.AddTransient<CategoryService>();
+//builder.Services.AddTransient<ProductService>();
+//builder.Services.AddTransient<ProductRepository>();
+//builder.Services.AddTransient<AccountService>();
+//builder.Services.AddTransient<AccountRepository>();
+//builder.Services.AddTransient<AdminService>();
+//builder.Services.AddTransient<AdminRepository>();
 
 var app = builder.Build();
 
@@ -60,12 +67,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
 
     var context1 = services.GetRequiredService<ApplicationDbContext>();
-    var context2 = services.GetRequiredService<SecondDbContext>();
-
   
     context1.Database.EnsureCreated();
-    context2.Database.EnsureCreated();
-
     await SeedData.Initialize(services);
 }
 
