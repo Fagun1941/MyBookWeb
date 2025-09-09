@@ -1,87 +1,50 @@
 ﻿using BukyBookWeb.Data;
 using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
+using System.Linq.Expressions;
 
 namespace BukyBookWeb.Repositories
 {
-    public class CategoryRepository : ICategoryRepository
+    public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
     {
-        private readonly ApplicationDbContext _context;
+        public CategoryRepository(ApplicationDbContext context) : base(context) { }
 
-        public CategoryRepository(ApplicationDbContext context)
+        public IEnumerable<Category> GetAllCategory(string? search, int page, int pageSize)
         {
-            _context = context;
-        }
+            var term = search?.Trim();
+            Expression<Func<Category, bool>>? predicate =
+                string.IsNullOrEmpty(term) ? null : c => c.Name.ToLower().Contains(term.ToLower());
 
-        public IEnumerable<Category> GetAllCategory(string search,int page, int pageSize)
+            return GetAll(
+                term,
+                page,
+                pageSize,
+                predicate,
+                q => q.OrderBy(c => c.Id)
+            );
+        }
+        public Category? GetByIdCategory(int id)
         {
-            var query = _context.Categories.AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(c => c.Name.ToLower().Contains(search.ToLower()));
-            }
-
-            return query.OrderBy(p => p.Id)
-                        .Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
-            //return DummyData.Categories;
-
+            return GetById(id);
         }
-
-        public Category GetByIdCategory(int id)
-        {
-            return _context.Categories.Find(id);
-            //return DummyData.Categories.FirstOrDefault(c => c.Id == id);
-        }
-
         public void AddCategory(Category category)
         {
-            _context.Categories.Add(category);
-            _context.SaveChanges();
-
-            //DummyData.Categories.Add(category);
+            Add(category);
         }
-
         public void UpdateCategory(Category category)
         {
-            _context.Categories.Update(category);
-            _context.SaveChanges();
-
-            //var existing = DummyData.Categories.FirstOrDefault(c => c.Id == category.Id);
-            //if (existing != null)
-            //{
-            //    existing.Name = category.Name;
-            //    existing.DisplayOrder = category.DisplayOrder;
-            //}
+            Update(category);
         }
-
         public void DeleteCategory(int id)
         {
-            var category = _context.Categories.Find(id);
-            if (category != null)
-            {
-                _context.Categories.Remove(category);
-                _context.SaveChanges();
-            }
-
-            //var category = DummyData.Categories.FirstOrDefault(c => c.Id == id);
-            //if (category != null)
-            //{
-            //    DummyData.Categories.Remove(category);
-            //}
+            Delete(id);
         }
+
         public int GetTotalCategoriesCount(string search)
         {
-            if (string.IsNullOrEmpty(search))
-            {
-                return _context.Categories.Count();
-            }
-            return _context.Categories
-                          .Where(c => c.Name.Contains(search))
-                          .Count();
+            return GetTotalCount(string.IsNullOrEmpty(search)
+                ? null
+                : c => c.Name.Contains(search));
         }
-
     }
 }

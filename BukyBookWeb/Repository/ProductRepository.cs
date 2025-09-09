@@ -4,71 +4,52 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BukyBookWeb.Repositories
 {
-    public class ProductRepository : IProductRepository
+    public class ProductRepository : BaseRepository<Product>, IProductRepository
     {
-        private readonly ApplicationDbContext _db;
-
-        public ProductRepository(ApplicationDbContext db)
-        {
-            _db = db;
-        }
+        public ProductRepository(ApplicationDbContext db) : base(db) { }
 
         public IEnumerable<Product> GetAllProduct(string search, int page, int pageSize)
         {
-           // return _db.Products.Include(p => p.Category).ToList();
-
-            var query = _db.Products.Include(p=>p.Category).AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(c => c.Title.ToLower().Contains(search.ToLower()));
-            }
-
-            return query.OrderBy(p => p.Id)
-                        .Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
+            return GetAll(
+                search,
+                page,
+                pageSize,
+                p => p.Title.ToLower().Contains(search.ToLower()),
+                q => q.OrderBy(p => p.Id),
+                p => p.Category
+            );
         }
 
-        public Product GetByIdProduct(int id)
+        public Product? GetByIdProduct(int id)
         {
-            return _db.Products.Include(p => p.Category).FirstOrDefault(p => p.Id == id);
+            return _context.Products?
+                           .Include(p => p.Category)
+                           .FirstOrDefault(p => p.Id == id);
         }
 
         public void AddProduct(Product product)
         {
-            _db.Products.Add(product);
-            _db.SaveChanges();
+            Add(product);
         }
-
         public void UpdateProduct(Product product)
         {
-            _db.Products.Update(product);
-            _db.SaveChanges();
+            Update(product);
         }
-
         public void DeleteProduct(int id)
         {
-            var product = _db.Products.Find(id);
-            if (product != null)
-            {
-                _db.Products.Remove(product);
-                _db.SaveChanges();
-            }
+            Delete(id);
         }
+
         public IEnumerable<Category> GetCategories()
         {
-            return _db.Categories.ToList();
+            return _context.Categories.ToList();
         }
+
         public int GetTotalProductCount(string search)
         {
-            if (string.IsNullOrEmpty(search))
-            {
-                return _db.Products.Count();
-            }
-            return _db.Categories
-                          .Where(c => c.Name.Contains(search))
-                          .Count();
+            return GetTotalCount(string.IsNullOrEmpty(search)
+                ? null
+                : p => p.Title.Contains(search));
         }
     }
 }
