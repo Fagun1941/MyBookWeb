@@ -10,46 +10,104 @@ namespace BukyBookWeb.Repositories
 
         public IEnumerable<Product> GetAllProduct(string search, int page, int pageSize)
         {
-            return GetAll(
-                search,
-                page,
-                pageSize,
-                p => p.Title.ToLower().Contains(search.ToLower()),
-                q => q.OrderBy(p => p.Id),
-                p => p.Category
-            );
+            try
+            {
+                return GetAll(
+                    search,
+                    page,
+                    pageSize,
+                    p => p.Title.ToLower().Contains(search.ToLower()),
+                    q => q.OrderBy(p => p.Id),
+                    p => p.Category
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching products with search='{search}': {ex.Message}");
+                throw;
+            }
         }
 
         public Product? GetByIdProduct(int id)
         {
-            return _context.Products?
-                           .Include(p => p.Category)
-                           .FirstOrDefault(p => p.Id == id);
+            try
+            {
+                return _context.Products?
+                               .Include(p => p.Category)
+                               .FirstOrDefault(p => p.Id == id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching Product with Id={id}: {ex.Message}");
+                throw;
+            }
         }
 
         public void AddProduct(Product product)
         {
-            Add(product);
+            try
+            {
+                Add(product);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding Product {product.Title}: {ex.Message}");
+                throw;
+            }
         }
+
         public void UpdateProduct(Product product)
         {
-            Update(product);
+            try
+            {
+                Update(product);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Product Id={product.Id}: {ex.Message}");
+                throw;
+            }
         }
+
         public void DeleteProduct(int id)
         {
-            Delete(id);
+            try
+            {
+                Delete(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting Product Id={id}: {ex.Message}");
+                throw;
+            }
         }
 
         public IEnumerable<Category> GetCategories()
         {
-            return _context.Categories.ToList();
+            try
+            {
+                return _context.Categories.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching categories: {ex.Message}");
+                throw;
+            }
         }
 
         public int GetTotalProductCount(string search)
         {
-            return GetTotalCount(string.IsNullOrEmpty(search)
-                ? null
-                : p => p.Title.Contains(search));
+            try
+            {
+                return GetTotalCount(string.IsNullOrEmpty(search)
+                    ? null
+                    : p => p.Title.Contains(search));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error counting products with search='{search}': {ex.Message}");
+                throw;
+            }
         }
     }
 }

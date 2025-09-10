@@ -20,32 +20,63 @@ namespace BukyBookWeb.Repositories
         // Get all users
         public List<ApplicationUser> GetAllUsers()
         {
-            return _userManager.Users.ToList();
+            try
+            {
+                return _userManager.Users.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching all users: {ex.Message}");
+                throw;
+            }
         }
 
         // Add Admin role to user
         public async Task AddAdminRoleAsync(ApplicationUser user)
         {
-            if (user != null && !await _userManager.IsInRoleAsync(user, "Admin"))
+            try
             {
-                await _userManager.AddToRoleAsync(user, "Admin");
+                if (user != null && !await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    await _userManager.AddToRoleAsync(user, "Admin");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding Admin role to user {user?.UserName}: {ex.Message}");
+                throw;
             }
         }
 
         // Remove Admin role from user
         public async Task RemoveAdminRoleAsync(ApplicationUser user)
         {
-            if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+            try
             {
-                await _userManager.RemoveFromRoleAsync(user, "Admin");
+                if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    await _userManager.RemoveFromRoleAsync(user, "Admin");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error removing Admin role from user {user?.UserName}: {ex.Message}");
+                throw;
             }
         }
 
         // Find user by Id
         public async Task<ApplicationUser?> FindByIdAsync(string userId)
         {
-            return await _userManager.FindByIdAsync(userId);
+            try
+            {
+                return await _userManager.FindByIdAsync(userId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error finding user by Id={userId}: {ex.Message}");
+                throw;
+            }
         }
     }
 }
-
