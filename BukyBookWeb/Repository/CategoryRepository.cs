@@ -27,9 +27,7 @@ namespace BukyBookWeb.Repositories
             }
             catch (Exception ex)
             {
-                // Example: log the error
                 Console.WriteLine($"Error fetching categories: {ex.Message}");
-                 //if you want the caller to handle it
                  throw;
             }
         }

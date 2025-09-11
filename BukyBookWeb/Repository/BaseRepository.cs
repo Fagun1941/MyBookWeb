@@ -45,7 +45,7 @@ namespace BukyBookWeb.Repositories
                     query = orderBy(query);
                 }
 
-                if (page < 1) page = 1;
+               // if (page < 1) page = 1;
 
                 // apply pagination
                 return query.Skip((page - 1) * pageSize)
@@ -56,6 +56,8 @@ namespace BukyBookWeb.Repositories
             {
                 // Log error (better: inject ILogger<T> instead of Console)
                 Console.WriteLine($"Repository Error in GetAll: {ex.Message}");
+                //return Enumerable.Empty<T>();
+                //return Enumerable.Empty<T>();
                 throw; // rethrow so service layer knows
             }
         }
