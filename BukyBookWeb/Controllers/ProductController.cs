@@ -17,21 +17,39 @@ namespace BukyBookWeb.Controllers
 
         public IActionResult Index(string search, int page = 1)
         {
-            int pageSize = 3;
-            var products = _productService.GetAllProduct(search,page,pageSize);
-            int totalProducts = _productService.GetTotalCountProduct(search);
-            ViewBag.PageNumber = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
-            ViewBag.Search = search;
-            return View(products);
+            try
+            {
+                int pageSize = 3;
+                var products = _productService.GetAllProduct(search, page, pageSize);
+
+                int totalProducts = _productService.GetTotalCountProduct(search);
+                ViewBag.PageNumber = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+                ViewBag.Search = search;
+
+                return View(products);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error loading products: {ex.Message}";
+                return View("Error");
+            }
         }
 
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-            ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name");
-            return View();
+            try
+            {
+                ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name");
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error loading create form: {ex.Message}";
+                return View("Error");
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -39,24 +57,40 @@ namespace BukyBookWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Product product, IFormFile? file)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _productService.AddProduct(product, file);
-                return RedirectToAction(nameof(Index));
-            }
+                if (ModelState.IsValid)
+                {
+                    _productService.AddProduct(product, file);
+                    return RedirectToAction(nameof(Index));
+                }
 
-            ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
-            return View(product);
+                ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error creating product: {ex.Message}";
+                return View("Error");
+            }
         }
 
         [Authorize(Roles = "Admin")]
         public IActionResult EditProduct(int id)
         {
-            var product = _productService.GetByIdProduct(id);
-            if (product == null) return NotFound();
+            try
+            {
+                var product = _productService.GetByIdProduct(id);
+                if (product == null) return NotFound();
 
-            ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
-            return View(product);
+                ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error loading product for edit: {ex.Message}";
+                return View("Error");
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -64,30 +98,55 @@ namespace BukyBookWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Product product, IFormFile? file)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _productService.UpdateProduct(product, file);
-                return RedirectToAction(nameof(Index));
-            }
+                if (ModelState.IsValid)
+                {
+                    _productService.UpdateProduct(product, file);
+                    return RedirectToAction(nameof(Index));
+                }
 
-            ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
-            return View(product);
+                ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error updating product: {ex.Message}";
+                return View("Error");
+            }
         }
 
         [HttpGet]
         public IActionResult Details(int id)
         {
-            var product = _productService.GetByIdProduct(id);
-            if (product == null) return NotFound();
-            return View(product);
+            try
+            {
+                var product = _productService.GetByIdProduct(id);
+                if (product == null) return NotFound();
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error loading product details: {ex.Message}";
+                return View("Error");
+            }
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            _productService.DeleteProduct(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                _productService.DeleteProduct(id);
+                TempData["SuccessMessage"] = "Product deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error deleting product: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

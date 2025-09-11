@@ -2,6 +2,7 @@ using BukyBookWeb.Data;
 using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
+using BukyBookWeb.Repository;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -36,6 +37,9 @@ builder.Services.AddScoped<IAccountService,AccountService>();
 builder.Services.AddScoped<IAccountRepository,AccountRepository>();
 builder.Services.AddScoped<IAdminService,AdminService>();
 builder.Services.AddScoped<IAdminRepository,AdminRepository>();
+builder.Services.AddScoped<ICalculatorRepository, CalculatorReposity>();
+builder.Services.AddScoped<ICalculatorService,CalculatorService>();
+
 
 //builder.Services.AddTransient<CategoryRepository>();
 //builder.Services.AddTransient<CategoryService>();

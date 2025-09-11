@@ -11,6 +11,6 @@ namespace BukyBookWeb.Models
         [Range(1,50,ErrorMessage = "Order Must be 1 between 50")]
         public required string DisplayOrder { get; set; }
         public DateTime CreateDateTime { get; set; } = DateTime.Now;
-        public ICollection<Product>? Products { get; set; }
+        public required ICollection<Product> Products { get; set; }
     }
 }

@@ -23,62 +23,118 @@ namespace BukyBookWeb.Repositories
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             params Expression<Func<T, object>>[] includes)
         {
-            IQueryable<T> query = _dbSet;
-
-            // apply includes
-            foreach (var include in includes)
+            try
             {
-                query = query.Include(include);
-            }
+                IQueryable<T> query = _dbSet;
 
-            // apply search filter
-            if (!string.IsNullOrEmpty(search) && searchPredicate != null)
+                // apply includes
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+
+                // apply search filter
+                if (!string.IsNullOrEmpty(search) && searchPredicate != null)
+                {
+                    query = query.Where(searchPredicate);
+                }
+
+                // apply ordering
+                if (orderBy != null)
+                {
+                    query = orderBy(query);
+                }
+
+               // if (page < 1) page = 1;
+
+                // apply pagination
+                return query.Skip((page - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+            }
+            catch (Exception ex)
             {
-                query = query.Where(searchPredicate);
+                // Log error (better: inject ILogger<T> instead of Console)
+                Console.WriteLine($"Repository Error in GetAll: {ex.Message}");
+                //return Enumerable.Empty<T>();
+                //return Enumerable.Empty<T>();
+                throw; // rethrow so service layer knows
             }
-
-            // apply ordering
-            if (orderBy != null)
-            {
-                query = orderBy(query);
-            }
-
-            // apply pagination
-            return query.Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
         }
 
         public virtual T? GetById(int id)
         {
-            return _dbSet.Find(id);
+            try
+            {
+                return _dbSet.Find(id);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Error in GetById for entity {typeof(T).Name}, Id={id}: {ex.Message}");
+                throw;
+            }
+            
         }
 
         public virtual void Add(T entity)
         {
-            _dbSet.Add(entity);
-            _context.SaveChanges();
+            try
+            {
+                _dbSet.Add(entity);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Add for {typeof(T).Name}: {ex.Message}");
+                throw; 
+            }
         }
 
         public virtual void Update(T entity)
         {
-            _dbSet.Update(entity);
-            _context.SaveChanges();
+            try
+            {
+                _dbSet.Update(entity);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Update for {typeof(T).Name}: {ex.Message}");
+                throw;
+            }
         }
 
         public virtual void Delete(int id)
         {
-            var entity = _dbSet.Find(id);
-            if (entity != null)
+            try
             {
-                _dbSet.Remove(entity);
-                _context.SaveChanges();
+                var entity = _dbSet.Find(id);
+                if (entity != null)
+                {
+                    _dbSet.Remove(entity);
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Delete for {typeof(T).Name}, Id={id}: {ex.Message}");
+                throw;
             }
         }
 
+
         public virtual int GetTotalCount(Expression<Func<T, bool>>? predicate = null)
         {
-            return predicate == null ? _dbSet.Count() : _dbSet.Count(predicate);
+            try
+            {
+                return predicate == null ? _dbSet.Count() : _dbSet.Count(predicate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetTotalCount for {typeof(T).Name}: {ex.Message}");
+                throw;
+            }
         }
+
     }
 }

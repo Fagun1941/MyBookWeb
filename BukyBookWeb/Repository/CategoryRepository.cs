@@ -11,40 +11,92 @@ namespace BukyBookWeb.Repositories
 
         public IEnumerable<Category> GetAllCategory(string? search, int page, int pageSize)
         {
-            var term = search?.Trim();
-            Expression<Func<Category, bool>>? predicate =
-                string.IsNullOrEmpty(term) ? null : c => c.Name.ToLower().Contains(term.ToLower());
+            try
+            {
+                var term = search?.Trim();
+                Expression<Func<Category, bool>>? predicate =
+                    string.IsNullOrEmpty(term) ? null : c => c.Name.ToLower().Contains(term.ToLower());
 
-            return GetAll(
-                term,
-                page,
-                pageSize,
-                predicate,
-                q => q.OrderBy(c => c.Id)
-            );
+                return GetAll(
+                    term,
+                    page,
+                    pageSize,
+                    predicate,
+                    q => q.OrderBy(c => c.Id)
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching categories: {ex.Message}");
+                 throw;
+            }
         }
         public Category? GetByIdCategory(int id)
         {
-            return GetById(id);
+            try
+            {
+                return GetById(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching Category with Id={id}: {ex.Message}");
+                throw;
+            }
         }
+
         public void AddCategory(Category category)
         {
-            Add(category);
+            try
+            {
+                Add(category);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding Category {category.Name}: {ex.Message}");
+                throw;
+            }
         }
+
         public void UpdateCategory(Category category)
         {
-            Update(category);
+            try
+            {
+                Update(category);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Category Id={category.Id}: {ex.Message}");
+                throw;
+            }
         }
+
         public void DeleteCategory(int id)
         {
-            Delete(id);
+            try
+            {
+                Delete(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting Category Id={id}: {ex.Message}");
+                throw;
+            }
         }
 
         public int GetTotalCategoriesCount(string search)
         {
-            return GetTotalCount(string.IsNullOrEmpty(search)
-                ? null
-                : c => c.Name.Contains(search));
+            try
+            {
+                return GetTotalCount(string.IsNullOrEmpty(search)
+                    ? null
+                    : c => c.Name.Contains(search));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error counting categories with search='{search}': {ex.Message}");
+                throw;
+            }
         }
+
     }
 }

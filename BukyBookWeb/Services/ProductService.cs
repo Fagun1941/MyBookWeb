@@ -1,5 +1,10 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace BukyBookWeb.Services
 {
@@ -16,66 +21,126 @@ namespace BukyBookWeb.Services
                 Directory.CreateDirectory(_imageFolder);
         }
 
-        public IEnumerable<Product> GetAllProduct(string search, int page , int pageSize)
+        public IEnumerable<Product> GetAllProduct(string search, int page, int pageSize)
         {
-             var products = _repository.GetAllProduct(search, page, pageSize);
-            if (!string.IsNullOrWhiteSpace(search))
+            try
             {
-                products = products
-                    .Where(c => c.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+                var products = _repository.GetAllProduct(search, page, pageSize);
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    products = products
+                        .Where(c => c.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+                }
+                return products;
             }
-            return products;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching products with search='{search}': {ex.Message}");
+                throw;
+            }
         }
 
         public Product GetByIdProduct(int id)
         {
-            return _repository.GetByIdProduct(id);
+            try
+            {
+                return _repository.GetByIdProduct(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching Product with Id={id}: {ex.Message}");
+                throw;
+            }
         }
 
         public void AddProduct(Product product, IFormFile? file)
         {
-            HandleFileUpload(product, file);
-            _repository.AddProduct(product);
+            try
+            {
+                HandleFileUpload(product, file);
+                _repository.AddProduct(product);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding Product '{product.Title}': {ex.Message}");
+                throw;
+            }
         }
 
         public void UpdateProduct(Product product, IFormFile? file)
         {
-            HandleFileUpload(product, file);
-            _repository.UpdateProduct(product);
+            try
+            {
+                HandleFileUpload(product, file);
+                _repository.UpdateProduct(product);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Product Id={product.Id}: {ex.Message}");
+                throw;
+            }
         }
 
         public void DeleteProduct(int id)
         {
-            _repository.DeleteProduct(id);
+            try
+            {
+                _repository.DeleteProduct(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting Product Id={id}: {ex.Message}");
+                throw;
+            }
         }
 
         public IEnumerable<Category> GetCategories()
         {
-            return _repository.GetCategories();
+            try
+            {
+                return _repository.GetCategories();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching categories: {ex.Message}");
+                throw;
+            }
         }
 
         private void HandleFileUpload(Product product, IFormFile? file)
         {
             if (file == null || file.Length == 0) return;
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(_imageFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                file.CopyTo(stream);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(_imageFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+
+                product.ImageUrl = "/images/products/" + fileName;
             }
-
-            product.ImageUrl = "/images/products/" + fileName;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error uploading file for Product '{product.Title}': {ex.Message}");
+                throw;
+            }
         }
-
-      
 
         public int GetTotalCountProduct(string search)
         {
-            var productCount = _repository.GetTotalProductCount(search);
-
-            return productCount;
+            try
+            {
+                return _repository.GetTotalProductCount(search);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error counting products with search='{search}': {ex.Message}");
+                throw;
+            }
         }
     }
 }
