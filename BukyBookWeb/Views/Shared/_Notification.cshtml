@@ -1,15 +1,17 @@
-﻿@if (TempData["Success"] != null || TempData["Error"] != null)
+﻿@model BukyBookWeb.Models.ErrorViewModel
+
+@if (Model.SuccessMessage == null || Model.SuccessMessage == null)
 {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script type="text/javascript">
-        @if (TempData["Success"] != null)
+        @if (Model.SuccessMessage != null)
         {
-                @:toastr.success('@TempData["Success"]');
+                    @:toastr.success('@Model.SuccessMessage');
         }
-        @if (TempData["Error"] != null)
+        @if (Model.SuccessMessage != null)
         {
-                @:toastr.error('@TempData["Error"]');
+                    @:toastr.error('@Model.SuccessMessage');
         }
     </script>
 }

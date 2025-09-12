@@ -23,9 +23,10 @@ public class ErrorHandlingMiddleware
 
             // Save error in TempData
             var factory = context.RequestServices.GetRequiredService<ITempDataDictionaryFactory>();
-            var TempData = factory.GetTempData(context);
-            TempData["ErrorMessage"] = ex.Message;
-
+            var tempData = factory.GetTempData(context);
+            tempData["ErrorMessage"] = ex.Message;
+            var provider = context.RequestServices.GetRequiredService<ITempDataProvider>();
+            provider.SaveTempData(context, tempData);
             // Redirect to error page
             context.Response.Redirect("/Home/Error");
         }

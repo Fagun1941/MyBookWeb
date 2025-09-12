@@ -1,6 +1,7 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace BukyBookWeb.Controllers
 {
@@ -15,36 +16,32 @@ namespace BukyBookWeb.Controllers
 
         public IActionResult Index(string search, int page = 1)
         {
-            //try
-            //{
-            //    int pageSize = 3;
-            //    var categories = _categoryService.GetAllCategory(search, page, pageSize);
+            try
+            {
+                int pageSize = 3;
+                var categories = _categoryService.GetAllCategory(search, page, pageSize);
 
-            //    int totalCategories = _categoryService.GetTotalCount(search);
-            //    ViewBag.PageNumber = page;
-            //    ViewBag.PageSize = pageSize;
-            //    ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
+                int totalCategories = _categoryService.GetTotalCount(search);
+                ViewBag.PageNumber = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
 
-            //    ViewBag.Search = search;
-            //    return View(categories);
-            //}
-            //catch (Exception ex)
-            //{
-            //    // Log the exception here
-            //    TempData["ErrorMessage"] = $"Error loading categories: {ex.Message}";
-            //    return View("Error"); // You can create a shared Error.cshtml view
-            //}
+                ViewBag.Search = search;
+                return View(categories);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here
+                //TempData["ErrorMessage"] = $"Error loading categories: {ex.Message}";
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Loading Categories : {ex.Message}"
+                };
+                return View("Error",errorModel); // You can create a shared Error.cshtml view
+            }
 
-            int pageSize = 3;
-            var categories = _categoryService.GetAllCategory(search, page, pageSize);
 
-            int totalCategories = _categoryService.GetTotalCount(search);
-            ViewBag.PageNumber = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
-
-            ViewBag.Search = search;
-            return View(categories);
         }
 
         public IActionResult Create()
@@ -55,9 +52,15 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading create form: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error creating category: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
+
         }
 
         [HttpPost]
@@ -74,8 +77,13 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error creating category: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error category: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
 
@@ -92,9 +100,15 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading category for edit: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Editing category: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
+
         }
 
         [HttpPost]
@@ -111,9 +125,15 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error updating category: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Editing category: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
+
         }
 
         public IActionResult Delete(int id)
@@ -129,9 +149,15 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading category for delete: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Delete category: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
+
         }
 
         [HttpPost]
@@ -144,9 +170,15 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error deleting category: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Delete category: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
+
         }
     }
 }
