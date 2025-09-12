@@ -3,6 +3,7 @@ using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Diagnostics;
 
 namespace BukyBookWeb.Controllers
 {
@@ -32,8 +33,13 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading products: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Loading Product: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
 
@@ -47,8 +53,13 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading create form: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Loading Create: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
 
@@ -70,8 +81,13 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error creating product: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Create Product: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
 
@@ -88,8 +104,13 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading product for edit: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error loading product for edit: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
 
@@ -111,8 +132,13 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error updating product: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Updating Product: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
 
@@ -127,8 +153,13 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading product details: {ex.Message}";
-                return View("Error");
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Loading Details Product: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
 
@@ -139,13 +170,18 @@ namespace BukyBookWeb.Controllers
             try
             {
                 _productService.DeleteProduct(id);
-                TempData["SuccessMessage"] = "Product deleted successfully.";
+                
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error deleting product: {ex.Message}";
-                return RedirectToAction(nameof(Index));
+                var errorModel = new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error Loading Product: {ex.Message}"
+                };
+
+                return View("Error", errorModel);
             }
         }
     }

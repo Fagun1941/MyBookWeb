@@ -1,6 +1,7 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace BukyBookWeb.Controllers
@@ -23,8 +24,11 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading Register page: {ex.Message}";
-                return View("Error");
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error loading Register page: {ex.Message}"
+                });
             }
         }
 
@@ -40,8 +44,8 @@ namespace BukyBookWeb.Controllers
 
                     if (result.Succeeded)
                     {
-                        TempData["successa"] = "Successfully Registered";
                         return RedirectToAction("Index", "Home");
+
                     }
 
                     foreach (var error in result.Errors)
@@ -54,8 +58,11 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error during registration: {ex.Message}";
-                return View("Error");
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error during registration: {ex.Message}"
+                });
             }
         }
 
@@ -68,8 +75,11 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading Login page: {ex.Message}";
-                return View("Error");
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error loading Login page: {ex.Message}"
+                });
             }
         }
 
@@ -85,8 +95,8 @@ namespace BukyBookWeb.Controllers
 
                     if (result.Succeeded)
                     {
-                        TempData["successa"] = "Successfully Logged In";
-                        return RedirectToAction("Index", "Home");
+
+                        return RedirectToAction("Index", "Home", new { successMessage = "Login successfully" });
                     }
 
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -96,8 +106,11 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error during login: {ex.Message}";
-                return View("Error");
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error during login: {ex.Message}"
+                });
             }
         }
 
@@ -112,8 +125,11 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error during logout: {ex.Message}";
-                return View("Error");
+                return View("Error", new ErrorViewModel
+                {
+                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                    ErrorMessage = $"Error during logout: {ex.Message}"
+                });
             }
         }
     }

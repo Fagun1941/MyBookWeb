@@ -1,16 +1,18 @@
-﻿@model ErrorViewModel
+﻿@model BukyBookWeb.Models.ErrorViewModel
+
 @{
     ViewData["Title"] = (User.IsInRole("Admin")) ? "Error" : "Something went wrong";
 }
 
-@if(User.IsInRole("Admin")) {
+@if (User.IsInRole("Admin"))
+{
     <h1 class="text-danger">Error</h1>
     <h2 class="text-danger">An error occurred while processing your request.</h2>
 
-    @if (TempData["ErrorMessage"] != null)
+    @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
     {
         <div class="alert alert-danger">
-            <strong>Error:</strong> @TempData["ErrorMessage"]
+            <strong>Error:</strong> @Model.ErrorMessage
         </div>
     }
 
@@ -40,6 +42,4 @@ else
         <p>Please try again later.</p>
         <a href="/" class="btn btn-primary">Go Home</a>
     </div>
-
-
 }

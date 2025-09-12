@@ -2,6 +2,14 @@
     ViewData["Title"] = "Home Page";
 }
 
+@if (!string.IsNullOrEmpty(Model?.SuccessMessage))
+{
+    <script>
+        toastr.success('@Model.SuccessMessage');
+    </script>
+}
+
+
 @if (TempData["successa"] != null)
 {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
