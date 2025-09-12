@@ -15,25 +15,36 @@ namespace BukyBookWeb.Controllers
 
         public IActionResult Index(string search, int page = 1)
         {
-            try
-            {
-                int pageSize = 3;
-                var categories = _categoryService.GetAllCategory(search, page, pageSize);
+            //try
+            //{
+            //    int pageSize = 3;
+            //    var categories = _categoryService.GetAllCategory(search, page, pageSize);
 
-                int totalCategories = _categoryService.GetTotalCount(search);
-                ViewBag.PageNumber = page;
-                ViewBag.PageSize = pageSize;
-                ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
+            //    int totalCategories = _categoryService.GetTotalCount(search);
+            //    ViewBag.PageNumber = page;
+            //    ViewBag.PageSize = pageSize;
+            //    ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
 
-                ViewBag.Search = search;
-                return View(categories);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception here
-                TempData["ErrorMessage"] = $"Error loading categories: {ex.Message}";
-                return View("Error"); // You can create a shared Error.cshtml view
-            }
+            //    ViewBag.Search = search;
+            //    return View(categories);
+            //}
+            //catch (Exception ex)
+            //{
+            //    // Log the exception here
+            //    TempData["ErrorMessage"] = $"Error loading categories: {ex.Message}";
+            //    return View("Error"); // You can create a shared Error.cshtml view
+            //}
+
+            int pageSize = 3;
+            var categories = _categoryService.GetAllCategory(search, page, pageSize);
+
+            int totalCategories = _categoryService.GetTotalCount(search);
+            ViewBag.PageNumber = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
+
+            ViewBag.Search = search;
+            return View(categories);
         }
 
         public IActionResult Create()
