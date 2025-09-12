@@ -45,7 +45,7 @@ namespace BukyBookWeb.Repositories
                     query = orderBy(query);
                 }
 
-               // if (page < 1) page = 1;
+                if (page < 1) throw new Exception("don't press zero or negative number");
 
                 // apply pagination
                 return query.Skip((page - 1) * pageSize)

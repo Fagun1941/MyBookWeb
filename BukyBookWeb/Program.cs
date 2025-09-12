@@ -52,6 +52,8 @@ builder.Services.AddScoped<ICalculatorService,CalculatorService>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
