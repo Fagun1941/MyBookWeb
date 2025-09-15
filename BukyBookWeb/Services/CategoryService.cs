@@ -28,7 +28,7 @@ namespace BukyBookWeb.Services
                         .Where(c => c.Name.Contains(search, StringComparison.OrdinalIgnoreCase));
                 }
 
-                return categories.OrderBy(c => int.TryParse(c.DisplayOrder, out var num) ? num : int.MaxValue);
+                return categories.OrderBy(c => c.DisplayOrder);
             }
             catch (Exception ex)
             {

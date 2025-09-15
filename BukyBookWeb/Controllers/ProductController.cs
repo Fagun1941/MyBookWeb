@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Diagnostics;
+using System.Net;
+using BukyBookWeb.Helpers;
+
 
 namespace BukyBookWeb.Controllers
 {
@@ -16,7 +19,7 @@ namespace BukyBookWeb.Controllers
             _productService = productService;
         }
 
-        public IActionResult Index(string search, int page = 1)
+        public IActionResult Index(string? search, int page = 1)
         {
             try
             {
@@ -29,17 +32,12 @@ namespace BukyBookWeb.Controllers
                 ViewBag.TotalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
                 ViewBag.Search = search;
 
+                Response.StatusCode = (int)HttpStatusCode.OK;
                 return View(products);
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Loading Product: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Product: {ex.Message}");
             }
         }
 
@@ -49,17 +47,12 @@ namespace BukyBookWeb.Controllers
             try
             {
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name");
+                Response.StatusCode = (int)HttpStatusCode.OK;
                 return View();
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Loading Create: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Create: {ex.Message}");
             }
         }
 
@@ -73,21 +66,17 @@ namespace BukyBookWeb.Controllers
                 if (ModelState.IsValid)
                 {
                     _productService.AddProduct(product, file);
+                    Response.StatusCode = (int)HttpStatusCode.Created;
                     return RedirectToAction(nameof(Index));
                 }
 
+                Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 return View(product);
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Create Product: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Create Product: {ex.Message}");
             }
         }
 
@@ -97,20 +86,18 @@ namespace BukyBookWeb.Controllers
             try
             {
                 var product = _productService.GetByIdProduct(id);
-                if (product == null) return NotFound();
+                if (product == null)
+                {
+                    return this.HandleError(HttpStatusCode.NotFound, "Product not found");
+                }
 
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
+                Response.StatusCode = (int)HttpStatusCode.OK;
                 return View(product);
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error loading product for edit: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading product for edit: {ex.Message}");
             }
         }
 
@@ -124,21 +111,17 @@ namespace BukyBookWeb.Controllers
                 if (ModelState.IsValid)
                 {
                     _productService.UpdateProduct(product, file);
+                    Response.StatusCode = (int)HttpStatusCode.OK;
                     return RedirectToAction(nameof(Index));
                 }
 
+                Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 return View(product);
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Updating Product: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Updating Product: {ex.Message}");
             }
         }
 
@@ -148,18 +131,17 @@ namespace BukyBookWeb.Controllers
             try
             {
                 var product = _productService.GetByIdProduct(id);
-                if (product == null) return NotFound();
+                if (product == null)
+                {
+                    return this.HandleError(HttpStatusCode.NotFound, "Product not found");
+                }
+
+                Response.StatusCode = (int)HttpStatusCode.OK;
                 return View(product);
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Loading Details Product: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Details Product: {ex.Message}");
             }
         }
 
@@ -170,19 +152,16 @@ namespace BukyBookWeb.Controllers
             try
             {
                 _productService.DeleteProduct(id);
-                
+                Response.StatusCode = (int)HttpStatusCode.OK;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Loading Product: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Deleting Product: {ex.Message}");
             }
         }
+
+       
+       
     }
 }

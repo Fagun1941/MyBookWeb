@@ -1,17 +1,17 @@
-﻿@model BukyBookWeb.Models.ErrorViewModel
+﻿@model BukyBookWeb.Models.CommonModel
 
-@if (Model.SuccessMessage == null || Model.SuccessMessage == null)
+@if (Model.Message == null || Model.Message == null)
 {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script type="text/javascript">
-        @if (Model.SuccessMessage != null)
+        @if (Model.Message != null)
         {
-                    @:toastr.success('@Model.SuccessMessage');
+                    @:toastr.success('@Model.Message');
         }
-        @if (Model.SuccessMessage != null)
+        @if (Model.Message != null)
         {
-                    @:toastr.error('@Model.SuccessMessage');
+                    @:toastr.error('@Model.Message');
         }
     </script>
 }
