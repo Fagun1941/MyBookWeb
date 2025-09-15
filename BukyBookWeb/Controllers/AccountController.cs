@@ -1,7 +1,7 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace BukyBookWeb.Controllers
@@ -18,18 +18,12 @@ namespace BukyBookWeb.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            try
+            var response = new CommonModel
             {
-                return View();
-            }
-            catch (Exception ex)
-            {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error loading Register page: {ex.Message}"
-                });
-            }
+                Message = "Register page loaded",
+                StatusCode = HttpStatusCode.OK,
+            };
+            return View();
         }
 
         [HttpPost]
@@ -38,49 +32,37 @@ namespace BukyBookWeb.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
+                    return HandleError(HttpStatusCode.BadRequest, "Invalid registration data", model);
+
+                var result = await _accountService.RegisterAsync(model);
+
+                if (result.Succeeded)
                 {
-                    var result = await _accountService.RegisterAsync(model);
-
-                    if (result.Succeeded)
-                    {
-                        return RedirectToAction("Index", "Home");
-
-                    }
-
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
+                    return RedirectToAction("Index", "Home");
                 }
 
-                return View(model);
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+
+                return HandleError(HttpStatusCode.BadRequest, "Registration failed", model);
             }
             catch (Exception ex)
             {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error during registration: {ex.Message}"
-                });
+                return HandleError(HttpStatusCode.InternalServerError, $"Error during registration: {ex.Message}", model);
             }
         }
 
         [HttpGet]
         public IActionResult Login()
         {
-            try
+            var response = new CommonModel
             {
-                return View();
-            }
-            catch (Exception ex)
-            {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error loading Login page: {ex.Message}"
-                });
-            }
+                Message = "Login page loaded",
+                StatusCode = HttpStatusCode.OK,
+               
+            };
+            return View();
         }
 
         [HttpPost]
@@ -89,28 +71,22 @@ namespace BukyBookWeb.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
+                    return HandleError(HttpStatusCode.BadRequest, "Invalid login data", model);
+
+                var result = await _accountService.LoginAsync(model);
+
+                if (result.Succeeded)
                 {
-                    var result = await _accountService.LoginAsync(model);
-
-                    if (result.Succeeded)
-                    {
-
-                        return RedirectToAction("Index", "Home", new { successMessage = "Login successfully" });
-                    }
-
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return RedirectToAction("Index", "Home");
                 }
 
-                return View(model);
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return HandleError(HttpStatusCode.BadRequest, "Login failed", model);
             }
             catch (Exception ex)
             {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error during login: {ex.Message}"
-                });
+                return HandleError(HttpStatusCode.InternalServerError, $"Error during login: {ex.Message}", model);
             }
         }
 
@@ -125,12 +101,21 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                return View("Error", new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error during logout: {ex.Message}"
-                });
+                return HandleError(HttpStatusCode.InternalServerError, $"Error during logout: {ex.Message}");
             }
+        }
+
+        // 🔹 Centralized error handling
+        private IActionResult HandleError(HttpStatusCode statusCode, string message, object? data = null)
+        {
+            var errorModel = new CommonModel
+            {
+                Message = message,
+                StatusCode = statusCode,
+                Data = data
+            };
+            Response.StatusCode = (int)statusCode;
+            return View("Error", errorModel);
         }
     }
 }

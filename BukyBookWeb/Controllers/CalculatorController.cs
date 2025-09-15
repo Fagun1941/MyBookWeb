@@ -1,6 +1,7 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace BukyBookWeb.Controllers
 {
@@ -16,12 +17,21 @@ namespace BukyBookWeb.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            var response = new CommonModel
+            {
+                Message = "Calculator ready",
+                StatusCode = HttpStatusCode.OK,
+                Data = new CalculatorModel()
+            };
+
             return View(new CalculatorModel());
         }
 
         [HttpPost]
         public IActionResult Index(CalculatorModel model)
         {
+            var response = new CommonModel();
+
             try
             {
                 model.Result = model.Operation switch
@@ -32,14 +42,20 @@ namespace BukyBookWeb.Controllers
                     "Divide" => _calculatorService.Divide(model.Number1, model.Number2),
                     _ => throw new InvalidOperationException("Invalid operation selected.")
                 };
+
+                response.Message = "Calculation successful";
+                response.StatusCode = HttpStatusCode.OK;
+                response.Data = model;
             }
             catch (Exception ex)
             {
+                response.Message = $"Error: {ex.Message}";
+                response.StatusCode = HttpStatusCode.BadRequest;
                 model.ErrorMessage = ex.Message;
+                response.Data = model;
             }
 
             return View(model);
         }
-
     }
 }

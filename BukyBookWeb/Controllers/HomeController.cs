@@ -26,10 +26,9 @@ namespace BukyBookWeb.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error(string? message = null)
         {
-            var model = new ErrorViewModel
+            var model = new CommonModel 
             {
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                ErrorMessage = message
+                Message = message
             };
 
             return View(model);

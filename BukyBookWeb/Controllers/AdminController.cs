@@ -1,7 +1,8 @@
-﻿using BukyBookWeb.Services;
+﻿using BukyBookWeb.Models;
+using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace BukyBookWeb.Controllers
 {
@@ -21,12 +22,19 @@ namespace BukyBookWeb.Controllers
             try
             {
                 var users = _adminService.GetAllUsers();
+
+                var response = new CommonModel
+                {
+                    Message = "Users loaded successfully",
+                    StatusCode = HttpStatusCode.OK,
+                    Data = users
+                };
+
                 return View(users);
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error loading users: {ex.Message}";
-                return View("Error");
+                return HandleError(HttpStatusCode.InternalServerError, $"Error loading users: {ex.Message}");
             }
         }
 
@@ -38,18 +46,22 @@ namespace BukyBookWeb.Controllers
             {
                 if (string.IsNullOrEmpty(userId))
                 {
-                    TempData["ErrorMessage"] = "Invalid User ID.";
-                    return RedirectToAction("Users");
+                    return HandleError(HttpStatusCode.BadRequest, "Invalid User ID.");
                 }
 
                 await _adminService.AddAdminRoleAsync(userId);
-                TempData["SuccessMessage"] = "User promoted to Admin.";
-                return RedirectToAction("Users");
+
+                var response = new CommonModel
+                {
+                    Message = "User promoted to Admin successfully",
+                    StatusCode = HttpStatusCode.OK
+                };
+
+                return RedirectToAction(nameof(Users));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error assigning Admin role: {ex.Message}";
-                return RedirectToAction("Users");
+                return HandleError(HttpStatusCode.InternalServerError, $"Error assigning Admin role: {ex.Message}");
             }
         }
 
@@ -61,19 +73,35 @@ namespace BukyBookWeb.Controllers
             {
                 if (string.IsNullOrEmpty(userId))
                 {
-                    TempData["ErrorMessage"] = "Invalid User ID.";
-                    return RedirectToAction("Users");
+                    return HandleError(HttpStatusCode.BadRequest, "Invalid User ID.");
                 }
 
                 await _adminService.RemoveAdminRoleAsync(userId);
-                TempData["SuccessMessage"] = "Admin role removed successfully.";
-                return RedirectToAction("Users");
+
+                var response = new CommonModel
+                {
+                    Message = "Admin role removed successfully",
+                    StatusCode = HttpStatusCode.OK
+                };
+
+                return RedirectToAction(nameof(Users));
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Error removing Admin role: {ex.Message}";
-                return RedirectToAction("Users");
+                return HandleError(HttpStatusCode.InternalServerError, $"Error removing Admin role: {ex.Message}");
             }
+        }
+
+        // 🔹 Centralized error handling
+        private IActionResult HandleError(HttpStatusCode statusCode, string message)
+        {
+            var errorModel = new CommonModel
+            {
+                Message = message,
+                StatusCode = statusCode
+            };
+            Response.StatusCode = (int)statusCode;
+            return View("Error", errorModel);
         }
     }
 }

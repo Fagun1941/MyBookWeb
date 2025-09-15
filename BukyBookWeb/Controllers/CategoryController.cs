@@ -1,7 +1,8 @@
-﻿using BukyBookWeb.Models;
+﻿using BukyBookWeb.Helpers;
+using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using System.Net;
 
 namespace BukyBookWeb.Controllers
 {
@@ -14,7 +15,7 @@ namespace BukyBookWeb.Controllers
             _categoryService = categoryService;
         }
 
-        public IActionResult Index(string search, int page = 1)
+        public IActionResult Index(string? search, int page = 1)
         {
             try
             {
@@ -25,42 +26,32 @@ namespace BukyBookWeb.Controllers
                 ViewBag.PageNumber = page;
                 ViewBag.PageSize = pageSize;
                 ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
-
                 ViewBag.Search = search;
+
+                var response = new CommonModel
+                {
+                    Message = "Categories loaded successfully",
+                    StatusCode = HttpStatusCode.OK,
+                    Data = categories
+                };
+
                 return View(categories);
             }
             catch (Exception ex)
             {
-                // Log the exception here
-                //TempData["ErrorMessage"] = $"Error loading categories: {ex.Message}";
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Loading Categories : {ex.Message}"
-                };
-                return View("Error",errorModel); // You can create a shared Error.cshtml view
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading categories: {ex.Message}");
             }
-
-
         }
 
         public IActionResult Create()
         {
-            try
+            var response = new CommonModel
             {
-                return View();
-            }
-            catch (Exception ex)
-            {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error creating category: {ex.Message}"
-                };
+                Message = "Ready to create category",
+                StatusCode = HttpStatusCode.OK
+            };
 
-                return View("Error", errorModel);
-            }
-
+            return View();
         }
 
         [HttpPost]
@@ -71,19 +62,15 @@ namespace BukyBookWeb.Controllers
                 if (ModelState.IsValid)
                 {
                     _categoryService.AddCategory(category);
+
                     return RedirectToAction(nameof(Index));
                 }
-                return View(category);
+
+                return this.HandleError(HttpStatusCode.BadRequest, "Invalid category data");
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error category: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error creating category: {ex.Message}");
             }
         }
 
@@ -94,21 +81,22 @@ namespace BukyBookWeb.Controllers
                 var category = _categoryService.GetByIdCategory(id);
                 if (category == null)
                 {
-                    return NotFound();
+                    return this.HandleError(HttpStatusCode.NotFound, "Category not found");
                 }
-                return View(category);
+
+                var response = new CommonModel
+                {
+                    Message = "Category loaded for edit",
+                    StatusCode = HttpStatusCode.OK,
+                    Data = category
+                };
+
+                return View();
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Editing category: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error editing category: {ex.Message}");
             }
-
         }
 
         [HttpPost]
@@ -121,19 +109,13 @@ namespace BukyBookWeb.Controllers
                     _categoryService.UpdateCategory(category);
                     return RedirectToAction(nameof(Index));
                 }
-                return View(category);
+
+                return this.HandleError(HttpStatusCode.BadRequest, "Invalid category data");
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Editing category: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error updating category: {ex.Message}");
             }
-
         }
 
         public IActionResult Delete(int id)
@@ -143,21 +125,22 @@ namespace BukyBookWeb.Controllers
                 var category = _categoryService.GetByIdCategory(id);
                 if (category == null)
                 {
-                    return NotFound();
+                    return this.HandleError(HttpStatusCode.NotFound, "Category not found");
                 }
-                return View(category);
+
+                var response = new CommonModel
+                {
+                    Message = "Ready to delete category",
+                    StatusCode = HttpStatusCode.OK,
+                    Data = category
+                };
+
+                return View();
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Delete category: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading delete page: {ex.Message}");
             }
-
         }
 
         [HttpPost]
@@ -170,15 +153,10 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                var errorModel = new ErrorViewModel
-                {
-                    RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                    ErrorMessage = $"Error Delete category: {ex.Message}"
-                };
-
-                return View("Error", errorModel);
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error deleting category: {ex.Message}");
             }
-
         }
+
+
     }
 }
