@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +21,33 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefultConnection")
     ));
+
+
+// Setup Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+
+     .WriteTo.File(
+        path: "Logs/log-.txt",      
+        rollingInterval: RollingInterval.Day, 
+        retainedFileCountLimit: 30, 
+        restrictedToMinimumLevel: LogEventLevel.Error,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
+
+    .WriteTo.MSSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
+        sinkOptions: new MSSqlServerSinkOptions
+        {
+            TableName = "Logs",
+            AutoCreateSqlTable = true
+        },
+        restrictedToMinimumLevel: LogEventLevel.Error
+    )
+    .CreateLogger();
+
+builder.Host.UseSerilog(); 
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -39,16 +69,6 @@ builder.Services.AddScoped<IAdminService,AdminService>();
 builder.Services.AddScoped<IAdminRepository,AdminRepository>();
 builder.Services.AddScoped<ICalculatorRepository, CalculatorReposity>();
 builder.Services.AddScoped<ICalculatorService,CalculatorService>();
-
-
-//builder.Services.AddTransient<CategoryRepository>();
-//builder.Services.AddTransient<CategoryService>();
-//builder.Services.AddTransient<ProductService>();
-//builder.Services.AddTransient<ProductRepository>();
-//builder.Services.AddTransient<AccountService>();
-//builder.Services.AddTransient<AccountRepository>();
-//builder.Services.AddTransient<AdminService>();
-//builder.Services.AddTransient<AdminRepository>();
 
 var app = builder.Build();
 

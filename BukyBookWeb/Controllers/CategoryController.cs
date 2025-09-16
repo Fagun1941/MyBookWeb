@@ -9,10 +9,12 @@ namespace BukyBookWeb.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
+        private readonly ILogger<CategoryController> _logger; // ✅ add logger
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService, ILogger<CategoryController> logger)
         {
             _categoryService = categoryService;
+            _logger = logger;
         }
 
         public IActionResult Index(string? search, int page = 1)
@@ -28,29 +30,17 @@ namespace BukyBookWeb.Controllers
                 ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
                 ViewBag.Search = search;
 
-                var response = new CommonModel
-                {
-                    Message = "Categories loaded successfully",
-                    StatusCode = HttpStatusCode.OK,
-                    Data = categories
-                };
-
                 return View(categories);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error loading categories"); // ✅ log it
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading categories: {ex.Message}");
             }
         }
 
         public IActionResult Create()
         {
-            var response = new CommonModel
-            {
-                Message = "Ready to create category",
-                StatusCode = HttpStatusCode.OK
-            };
-
             return View();
         }
 
@@ -62,7 +52,6 @@ namespace BukyBookWeb.Controllers
                 if (ModelState.IsValid)
                 {
                     _categoryService.AddCategory(category);
-
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -70,6 +59,7 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error creating category"); // ✅ log it
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error creating category: {ex.Message}");
             }
         }
@@ -84,17 +74,11 @@ namespace BukyBookWeb.Controllers
                     return this.HandleError(HttpStatusCode.NotFound, "Category not found");
                 }
 
-                var response = new CommonModel
-                {
-                    Message = "Category loaded for edit",
-                    StatusCode = HttpStatusCode.OK,
-                    Data = category
-                };
-
-                return View();
+                return View(category); // ✅ should return category model to view
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error loading category for edit"); // ✅ log it
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error editing category: {ex.Message}");
             }
         }
@@ -114,6 +98,7 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error updating category"); // ✅ log it
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error updating category: {ex.Message}");
             }
         }
@@ -128,17 +113,11 @@ namespace BukyBookWeb.Controllers
                     return this.HandleError(HttpStatusCode.NotFound, "Category not found");
                 }
 
-                var response = new CommonModel
-                {
-                    Message = "Ready to delete category",
-                    StatusCode = HttpStatusCode.OK,
-                    Data = category
-                };
-
-                return View();
+                return View(category); // ✅ pass category to view
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error loading delete page"); // ✅ log it
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading delete page: {ex.Message}");
             }
         }
@@ -153,10 +132,9 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error deleting category"); // ✅ log it
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error deleting category: {ex.Message}");
             }
         }
-
-
     }
 }
