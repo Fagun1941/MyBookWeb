@@ -1,5 +1,6 @@
 using BukyBookWeb.Data;
 using BukyBookWeb.IRepository;
+using BukyBookWeb.IService;
 using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
 using BukyBookWeb.Repository;
@@ -24,30 +25,30 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 
 // Setup Serilog
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Console()
+//Log.Logger = new LoggerConfiguration()
+//    .MinimumLevel.Debug()
+//    .WriteTo.Console()
 
-     .WriteTo.File(
-        path: "Logs/log-.txt",      
-        rollingInterval: RollingInterval.Day, 
-        retainedFileCountLimit: 30, 
-        restrictedToMinimumLevel: LogEventLevel.Error,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-    )
+//     .WriteTo.File(
+//        path: "Logs/log-.txt",      
+//        rollingInterval: RollingInterval.Day, 
+//        retainedFileCountLimit: 30, 
+//        restrictedToMinimumLevel: LogEventLevel.Error,
+//        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+//    )
 
-    .WriteTo.MSSqlServer(
-        connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
-        sinkOptions: new MSSqlServerSinkOptions
-        {
-            TableName = "Logs",
-            AutoCreateSqlTable = true
-        },
-        restrictedToMinimumLevel: LogEventLevel.Error
-    )
-    .CreateLogger();
+//    .WriteTo.MSSqlServer(
+//        connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
+//        sinkOptions: new MSSqlServerSinkOptions
+//        {
+//            TableName = "Logs",
+//            AutoCreateSqlTable = true
+//        },
+//        restrictedToMinimumLevel: LogEventLevel.Error
+//    )
+//    .CreateLogger();
 
-builder.Host.UseSerilog(); 
+//builder.Host.UseSerilog(); 
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -58,6 +59,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login"; 
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
+builder.Services.AddSingleton<ICustomLogger, CustomLogger>();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService,CategoryService>();
