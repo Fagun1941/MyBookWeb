@@ -14,8 +14,17 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using System.Text;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()           // Enable view localization
+    .AddDataAnnotationsLocalization(); // Enable model validation localization
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources"); // Resource folder
 
 builder.Services.AddControllersWithViews();
 
@@ -24,31 +33,31 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
     ));
 
 
-// Setup Serilog
-//Log.Logger = new LoggerConfiguration()
-//    .MinimumLevel.Debug()
-//    .WriteTo.Console()
+//Setup Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
 
-//     .WriteTo.File(
-//        path: "Logs/log-.txt",      
-//        rollingInterval: RollingInterval.Day, 
-//        retainedFileCountLimit: 30, 
-//        restrictedToMinimumLevel: LogEventLevel.Error,
-//        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-//    )
+     .WriteTo.File(
+        path: "Logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        restrictedToMinimumLevel: LogEventLevel.Error,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
 
-//    .WriteTo.MSSqlServer(
-//        connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
-//        sinkOptions: new MSSqlServerSinkOptions
-//        {
-//            TableName = "Logs",
-//            AutoCreateSqlTable = true
-//        },
-//        restrictedToMinimumLevel: LogEventLevel.Error
-//    )
-//    .CreateLogger();
+    .WriteTo.MSSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
+        sinkOptions: new MSSqlServerSinkOptions
+        {
+            TableName = "Logs",
+            AutoCreateSqlTable = true
+        },
+        restrictedToMinimumLevel: LogEventLevel.Error
+    )
+    .CreateLogger();
 
-//builder.Host.UseSerilog(); 
+builder.Host.UseSerilog();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -59,7 +68,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login"; 
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
-builder.Services.AddSingleton<ICustomLogger, CustomLogger>();
+
+//builder.Services.AddSingleton<ICustomLogger, CustomLogger>();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService,CategoryService>();
@@ -73,6 +83,20 @@ builder.Services.AddScoped<ICalculatorRepository, CalculatorReposity>();
 builder.Services.AddScoped<ICalculatorService,CalculatorService>();
 
 var app = builder.Build();
+
+// Define supported cultures
+
+var supportedCultures = new[] { "en-US", "bn-BD" };
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en-US"),
+    SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList(),
+    SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList()
+};
+
+// Add middleware
+app.UseRequestLocalization(localizationOptions);
+
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 

@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject UserManager<ApplicationUser> UserManager
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,22 +18,23 @@
     <header>
         <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark" >
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BukyBookWeb</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"> @Localizer["Name"]</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarColor02">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link "  asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a>
                         </li>
                        
                         <li class="nav-item">
-                            <a class="nav-link "  asp-controller="Category" asp-action="Index">Category</a>
+                            <a class="nav-link" asp-controller="Category" asp-action="Index">@Localizer["Category"]</a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link " asp-controller="Product" asp-action="Index">Products</a>
+                            <a class="nav-link" asp-controller="Product" asp-action="Index">@Localizer["Products"]</a>
+
                         </li>
                      </ul>
 
@@ -47,29 +50,50 @@
                                 <li class="nav-item">
                                     <form asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-link nav-link text-light">Logout</button>
+                                        <button type="submit" class="btn btn-link nav-link text-light">@Localizer["Logout"]</button>
                                     </form>
                                 </li>
                             }
                             else
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                                    <a class="nav-link" asp-controller="Account" asp-action="Login">@Localizer["Login"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+                                    <a class="nav-link" asp-controller="Account" asp-action="Register">@Localizer["Register"]</a>
                                 </li>
                             }
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">@Localizer["Login"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">@Localizer["Register"]</a>
                             </li>
                         }
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                @Localizer["Language"]
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <form method="post" asp-controller="Home" asp-action="SetLanguage">
+                                        <input type="hidden" name="culture" value="en-US" />
+                                        <button type="submit" class="dropdown-item">English</button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form method="post" asp-controller="Home" asp-action="SetLanguage">
+                                        <input type="hidden" name="culture" value="bn-BD" />
+                                        <button type="submit" class="dropdown-item">Bangla</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+
 
                     </ul>
                 </div>
