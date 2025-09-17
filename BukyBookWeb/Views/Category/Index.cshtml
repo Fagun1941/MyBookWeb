@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<Category>
-
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = "Category List";
     int currentPage = ViewBag.PageNumber;
@@ -8,7 +8,7 @@
 }
 <div class="row pt-4 mb-2">
     <div class="col-6">
-        <h2 class="text-primary">Category List</h2>
+        <h2 class="text-primary">@Localizer["CategoryList"]</h2>
     </div>
     @if (User.IsInRole("Admin"))
     {
@@ -21,15 +21,15 @@
 </div>
 <div class="container p-1">
     <form asp-controller="Category" asp-action="Index" method="get" class="d-flex mb-3">
-        <input type="text" name="search" class="form-control" placeholder="Search by Categoryname" value="@search">
-        <button type="submit" class="btn btn-outline-primary ms-2">Search</button>
+        <input type="text" name="search" class="form-control" placeholder="@Localizer["Searchby"]" value="@search">
+        <button type="submit" class="btn btn-outline-primary ms-2">@Localizer["Search"]</button>
     </form>
 
     <div id="categoryGrid" class="grid-container">
         <div class="grid-row header">
-            <div class="grid-col col-name">Category Name</div>
-            <div class="grid-col col-order">Display Order</div>
-            <div class="grid-col col-actions text-center">Actions</div>
+            <div class="grid-col col-name">@Localizer["CategoryName"]</div>
+            <div class="grid-col col-order">@Localizer["DisplayOrder"]</div>
+            <div class="grid-col col-actions text-center">@Localizer["Action"]</div>
         </div>
 
         @foreach (var obj in Model)

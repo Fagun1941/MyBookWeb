@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<BukyBookWeb.Models.Product>
-
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     int currentPage = ViewBag.PageNumber;
     int totalPages = ViewBag.TotalPages;
@@ -8,7 +8,7 @@
 
 <div class="row pt-4 mb-2">
     <div class="col-6">
-        <h2 class="text-primary">Product</h2>
+        <h2 class="text-primary">@Localizer["Product"]</h2>
     </div>
 
     @if (User.IsInRole("Admin"))
@@ -22,8 +22,8 @@
 </div>
 
 <form asp-controller="Product" asp-action="Index" method="get" class="d-flex">
-    <input type="text" name="search" class="form-control" placeholder="Search by name" value="@search">
-    <button type="submit" class="btn btn-outline-primary ms-2">Search</button>
+    <input type="text" name="search" class="form-control" placeholder="@Localizer["Searchby"]" value="@search">
+    <button type="submit" class="btn btn-outline-primary ms-2">@Localizer["Search"]</button>
 </form>
 
 <div id="productList" class="container mt-4">
@@ -41,12 +41,12 @@
 
                         <div class="d-flex justify-content-between">
                             <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
-                                View Details
+                                @Localizer["ViewDetails"]
                             </a>
 
                             <form asp-controller="Home" asp-action="NewFeature" method="post" class="d-inline">
                                 <input type="hidden" name="id" value="@item.Id" />
-                                <button type="submit" class="btn btn-success btn-sm">Add to Cart</button>
+                                <button type="submit" class="btn btn-success btn-sm">@Localizer["Addtocart"]</button>
                             </form>
                         </div>
                     </div>

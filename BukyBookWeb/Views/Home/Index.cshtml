@@ -1,26 +1,14 @@
-﻿@{
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-@if (!string.IsNullOrEmpty(Model?.SuccessMessage))
-{
-    <script>
-        toastr.success('@Model.SuccessMessage');
-    </script>
-}
-
-
-@if (TempData["successa"] != null)
-{
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script type="text/javascript">
-        toastr.success('@TempData["successa"]');
-    </script>
-}
 
 
 <div class="text-center">
-    <h1 class="display-4">Welcome To My WebSide</h1>
-   
+    <h1 class="display-4">@Localizer["Welcome"]</h1>
 </div>
+
+<p>Current Culture: @System.Globalization.CultureInfo.CurrentCulture.Name</p>
+<p>Current UI Culture: @System.Globalization.CultureInfo.CurrentUICulture.Name</p>
