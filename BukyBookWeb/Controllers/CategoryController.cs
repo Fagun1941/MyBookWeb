@@ -2,6 +2,7 @@
 using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.Net;
 
 namespace BukyBookWeb.Controllers
@@ -9,12 +10,14 @@ namespace BukyBookWeb.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
-        private readonly ILogger<CategoryController> _logger; // ✅ add logger
+        private readonly ILogger<CategoryController> _logger;
+        private readonly IStringLocalizer<CategoryController> _localizer;
 
-        public CategoryController(ICategoryService categoryService, ILogger<CategoryController> logger)
+        public CategoryController(ICategoryService categoryService, ILogger<CategoryController> logger, IStringLocalizer<CategoryController> localizer)
         {
             _categoryService = categoryService;
             _logger = logger;
+            _localizer = localizer;
         }
 
         public IActionResult Index(string? search, int page = 1)
@@ -23,7 +26,6 @@ namespace BukyBookWeb.Controllers
             {
                 int pageSize = 3;
                 var categories = _categoryService.GetAllCategory(search, page, pageSize);
-
                 int totalCategories = _categoryService.GetTotalCount(search);
                 ViewBag.PageNumber = page;
                 ViewBag.PageSize = pageSize;
@@ -58,6 +60,7 @@ namespace BukyBookWeb.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    TempData["SuccessMessage"] = _localizer["CategoryCreated"].Value;
                     _categoryService.AddCategory(category);
                     return RedirectToAction(nameof(Index));
                 }

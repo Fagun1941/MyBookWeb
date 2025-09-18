@@ -16,8 +16,6 @@ using Serilog.Sinks.MSSqlServer;
 using System.Text;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
-using BukyBookWeb.ErrorHandling;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,15 +52,6 @@ Log.Logger = new LoggerConfiguration()
         },
         restrictedToMinimumLevel: LogEventLevel.Error
     )
-    // ✅ Deduplicate error logs
-    .Filter.ByExcluding(logEvent =>
-    {
-        if (logEvent.Level != LogEventLevel.Error)
-            return false; // allow non-error logs
-
-        var message = logEvent.RenderMessage();
-        return ErrorCache.AlreadyLogged(message); // skip if already logged
-    })
     .CreateLogger();
 
 

@@ -43,6 +43,7 @@ namespace BukyBookWeb.Controllers
    
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult SetLanguage(string culture, string returnUrl = null)
     {
         Response.Cookies.Append(

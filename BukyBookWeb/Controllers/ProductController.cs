@@ -11,7 +11,7 @@ namespace BukyBookWeb.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
-        private readonly ILogger<ProductController> _logger; // <-- use ILogger
+        private readonly ILogger<ProductController> _logger; 
 
         public ProductController(IProductService productService, ILogger<ProductController> logger)
         {

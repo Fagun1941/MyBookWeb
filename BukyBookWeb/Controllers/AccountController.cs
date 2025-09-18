@@ -1,18 +1,23 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Localization;
+using Microsoft.Extensions.Localization;
 using System.Net;
 using System.Threading.Tasks;
+
 
 namespace BukyBookWeb.Controllers
 {
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
+        private readonly IStringLocalizer<AccountController> _localizer;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IStringLocalizer<AccountController> localizer)
         {
             _accountService = accountService;
+            _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         [HttpGet]
@@ -78,6 +83,7 @@ namespace BukyBookWeb.Controllers
 
                 if (result.Succeeded)
                 {
+                    TempData["ToastMessage"] = _localizer["LoginSuccessMessage"].Value;
                     return RedirectToAction("Index", "Home");
                 }
 
