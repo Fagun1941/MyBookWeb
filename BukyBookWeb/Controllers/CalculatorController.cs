@@ -1,6 +1,7 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Net;
 
 namespace BukyBookWeb.Controllers
@@ -8,15 +9,18 @@ namespace BukyBookWeb.Controllers
     public class CalculatorController : Controller
     {
         private readonly ICalculatorService _calculatorService;
+        private readonly ILogger<CalculatorController> _logger; 
 
-        public CalculatorController(ICalculatorService calculatorService)
+        public CalculatorController(ICalculatorService calculatorService, ILogger<CalculatorController> logger)
         {
             _calculatorService = calculatorService;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
+            _logger.LogInformation("Calculator page loaded."); 
             var response = new CommonModel
             {
                 Message = "Calculator ready",
@@ -46,6 +50,11 @@ namespace BukyBookWeb.Controllers
                 response.Message = "Calculation successful";
                 response.StatusCode = HttpStatusCode.OK;
                 response.Data = model;
+
+                _logger.LogInformation(
+                    "Calculation successful: {Number1} {Operation} {Number2} = {Result}",
+                    model.Number1, model.Operation, model.Number2, model.Result
+                );
             }
             catch (Exception ex)
             {
@@ -53,6 +62,11 @@ namespace BukyBookWeb.Controllers
                 response.StatusCode = HttpStatusCode.BadRequest;
                 model.ErrorMessage = ex.Message;
                 response.Data = model;
+
+                _logger.LogError(ex,
+                    "Calculation failed for {Number1} {Operation} {Number2}",
+                    model.Number1, model.Operation, model.Number2
+                ); 
             }
 
             return View(model);

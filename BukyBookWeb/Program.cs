@@ -1,4 +1,4 @@
-using BukyBookWeb.Data;
+﻿using BukyBookWeb.Data;
 using BukyBookWeb.IRepository;
 using BukyBookWeb.IService;
 using BukyBookWeb.Models;
@@ -17,7 +17,6 @@ using System.Text;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews()
@@ -33,19 +32,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
     ));
 
 
-//Setup Serilog
+// Setup Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .WriteTo.Console()
-
-     .WriteTo.File(
+    .WriteTo.File(
         path: "Logs/log-.txt",
         rollingInterval: RollingInterval.Day,
         retainedFileCountLimit: 30,
         restrictedToMinimumLevel: LogEventLevel.Error,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
     )
-
     .WriteTo.MSSqlServer(
         connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
         sinkOptions: new MSSqlServerSinkOptions
@@ -56,6 +53,7 @@ Log.Logger = new LoggerConfiguration()
         restrictedToMinimumLevel: LogEventLevel.Error
     )
     .CreateLogger();
+
 
 builder.Host.UseSerilog();
 
