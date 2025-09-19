@@ -1,6 +1,7 @@
 ﻿using BukyBookWeb.Data;
 using BukyBookWeb.IRepository;
 using BukyBookWeb.IService;
+using BukyBookWeb.Logging;
 using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
 using BukyBookWeb.Repository;
@@ -8,22 +9,25 @@ using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
-using System.Text;
-using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews()
-    .AddViewLocalization()           // Enable view localization
-    .AddDataAnnotationsLocalization(); // Enable model validation localization
+SerilogConfig.ConfigureSerilog(builder);
 
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources"); // Resource folder
+
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()           
+    .AddDataAnnotationsLocalization(); 
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources"); 
 
 builder.Services.AddControllersWithViews();
 
@@ -31,31 +35,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
     builder.Configuration.GetConnectionString("DefultConnection")
     ));
 
-
-// Setup Serilog
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Console()
-    .WriteTo.File(
-        path: "Logs/log-.txt",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 30,
-        restrictedToMinimumLevel: LogEventLevel.Error,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-    )
-    .WriteTo.MSSqlServer(
-        connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
-        sinkOptions: new MSSqlServerSinkOptions
-        {
-            TableName = "Logs",
-            AutoCreateSqlTable = true
-        },
-        restrictedToMinimumLevel: LogEventLevel.Error
-    )
-    .CreateLogger();
-
-
-builder.Host.UseSerilog();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -67,8 +46,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
 
-//builder.Services.AddSingleton<ICustomLogger, CustomLogger>();
 
+
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService,CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -82,7 +62,7 @@ builder.Services.AddScoped<ICalculatorService,CalculatorService>();
 
 var app = builder.Build();
 
-// Define supported cultures
+
 
 var supportedCultures = new[] { "en-US", "bn-BD" };
 var localizationOptions = new RequestLocalizationOptions
@@ -92,7 +72,6 @@ var localizationOptions = new RequestLocalizationOptions
     SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList()
 };
 
-// Add middleware
 app.UseRequestLocalization(localizationOptions);
 
 
