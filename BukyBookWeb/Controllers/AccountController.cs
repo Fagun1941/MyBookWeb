@@ -1,11 +1,10 @@
 ﻿using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Localization;
+using Serilog.Context;
 using System.Net;
 using System.Threading.Tasks;
-
 
 namespace BukyBookWeb.Controllers
 {
@@ -13,22 +12,30 @@ namespace BukyBookWeb.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IStringLocalizer<AccountController> _localizer;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAccountService accountService, IStringLocalizer<AccountController> localizer)
+        public AccountController(
+            IAccountService accountService,
+            IStringLocalizer<AccountController> localizer,
+            ILogger<AccountController> logger)
         {
             _accountService = accountService;
             _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Register()
         {
-            var response = new CommonModel
+            try
             {
-                Message = "Register page loaded",
-                StatusCode = HttpStatusCode.OK,
-            };
-            return View();
+                _logger.LogInformation("Register page loaded");
+                return View();
+            }
+            catch (Exception ex)
+            {
+                return LogAndHandleError(ex, "Error loading Register page");
+            }
         }
 
         [HttpPost]
@@ -44,6 +51,7 @@ namespace BukyBookWeb.Controllers
 
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation("User registered successfully: {Email}", model.Email);
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -54,20 +62,22 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                return HandleError(HttpStatusCode.InternalServerError, $"Error during registration: {ex.Message}", model);
+                return LogAndHandleError(ex, "Error during registration", model);
             }
         }
 
         [HttpGet]
         public IActionResult Login()
         {
-            var response = new CommonModel
+            try
             {
-                Message = "Login page loaded",
-                StatusCode = HttpStatusCode.OK,
-               
-            };
-            return View();
+                _logger.LogInformation("Login page loaded");
+                return View();
+            }
+            catch (Exception ex)
+            {
+                return LogAndHandleError(ex, "Error loading Login page");
+            }
         }
 
         [HttpPost]
@@ -84,6 +94,7 @@ namespace BukyBookWeb.Controllers
                 if (result.Succeeded)
                 {
                     TempData["ToastMessage"] = _localizer["LoginSuccessMessage"].Value;
+                    _logger.LogInformation("User logged in successfully: {Email}", model.Email);
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -92,7 +103,7 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                return HandleError(HttpStatusCode.InternalServerError, $"Error during login: {ex.Message}", model);
+                return LogAndHandleError(ex, "Error during login", model);
             }
         }
 
@@ -103,15 +114,28 @@ namespace BukyBookWeb.Controllers
             try
             {
                 await _accountService.LogoutAsync();
+                _logger.LogInformation("User logged out");
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
-                return HandleError(HttpStatusCode.InternalServerError, $"Error during logout: {ex.Message}");
+                return LogAndHandleError(ex, "Error during logout");
             }
         }
 
-        // 🔹 Centralized error handling
+        private IActionResult LogAndHandleError(Exception ex, string message, object? data = null)
+        {
+            var logGuid = Guid.NewGuid();
+            using (LogContext.PushProperty("LogGuid", logGuid))
+            {
+                _logger.LogError(ex, "{Message} | CorrelationId={LogGuid}", message, logGuid);
+            }
+
+            TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+
+            return HandleError(HttpStatusCode.InternalServerError, $"{message}. Tracking ID: {logGuid}", data);
+        }
+
         private IActionResult HandleError(HttpStatusCode statusCode, string message, object? data = null)
         {
             var errorModel = new CommonModel

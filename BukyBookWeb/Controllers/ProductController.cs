@@ -3,6 +3,7 @@ using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Serilog.Context;
 using System.Net;
 using BukyBookWeb.Helpers;
 
@@ -11,7 +12,7 @@ namespace BukyBookWeb.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
-        private readonly ILogger<ProductController> _logger; 
+        private readonly ILogger<ProductController> _logger;
 
         public ProductController(IProductService productService, ILogger<ProductController> logger)
         {
@@ -25,8 +26,8 @@ namespace BukyBookWeb.Controllers
             {
                 int pageSize = 3;
                 var products = _productService.GetAllProduct(search, page, pageSize);
-
                 int totalProducts = _productService.GetTotalCountProduct(search);
+
                 ViewBag.PageNumber = page;
                 ViewBag.PageSize = pageSize;
                 ViewBag.TotalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
@@ -39,8 +40,14 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading product list | Search: {Search} | Page: {Page}", search, page);
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Product: {ex.Message}");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                {
+                    _logger.LogError(ex, "Error loading product list | Search: {Search} | Page: {Page} | CorrelationId={LogGuid}", search, page, logGuid);
+                }
+
+                TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Product. Tracking ID: {logGuid}");
             }
         }
 
@@ -50,7 +57,6 @@ namespace BukyBookWeb.Controllers
             try
             {
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name");
-
                 _logger.LogInformation("Opened Create Product page");
 
                 Response.StatusCode = (int)HttpStatusCode.OK;
@@ -58,8 +64,14 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading Create page");
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Create: {ex.Message}");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                {
+                    _logger.LogError(ex, "Error loading Create page | CorrelationId={LogGuid}", logGuid);
+                }
+
+                TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Create. Tracking ID: {logGuid}");
             }
         }
 
@@ -80,15 +92,20 @@ namespace BukyBookWeb.Controllers
                 }
 
                 _logger.LogWarning("Create Product failed due to invalid model state");
-
                 Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 return View(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating product {ProductName}", product.Title);
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Create Product: {ex.Message}");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                {
+                    _logger.LogError(ex, "Error creating product {ProductName} | CorrelationId={LogGuid}", product.Title, logGuid);
+                }
+
+                TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Create Product. Tracking ID: {logGuid}");
             }
         }
 
@@ -104,16 +121,22 @@ namespace BukyBookWeb.Controllers
                     return this.HandleError(HttpStatusCode.NotFound, "Product not found");
                 }
 
+                ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 _logger.LogInformation("Opened Edit page for Product Id: {Id}", id);
 
-                ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 Response.StatusCode = (int)HttpStatusCode.OK;
                 return View(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading Edit page for Product Id: {Id}", id);
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading product for edit: {ex.Message}");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                {
+                    _logger.LogError(ex, "Error loading Edit page for Product Id: {Id} | CorrelationId={LogGuid}", id, logGuid);
+                }
+
+                TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading product for edit. Tracking ID: {logGuid}");
             }
         }
 
@@ -134,15 +157,20 @@ namespace BukyBookWeb.Controllers
                 }
 
                 _logger.LogWarning("Update Product failed due to invalid model state");
-
                 Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 return View(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating product {ProductName} (Id: {Id})", product.Title, product.Id);
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Updating Product: {ex.Message}");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                {
+                    _logger.LogError(ex, "Error updating product {ProductName} (Id: {Id}) | CorrelationId={LogGuid}", product.Title, product.Id, logGuid);
+                }
+
+                TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Updating Product. Tracking ID: {logGuid}");
             }
         }
 
@@ -159,19 +187,25 @@ namespace BukyBookWeb.Controllers
                 }
 
                 _logger.LogInformation("Viewed Product Details | Id: {Id}", id);
-
                 Response.StatusCode = (int)HttpStatusCode.OK;
                 return View(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading product details | Id: {Id}", id);
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Details Product: {ex.Message}");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                {
+                    _logger.LogError(ex, "Error loading product details | Id: {Id} | CorrelationId={LogGuid}", id, logGuid);
+                }
+
+                TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Details Product. Tracking ID: {logGuid}");
             }
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             try
@@ -184,8 +218,14 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting product | Id: {Id}", id);
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Deleting Product: {ex.Message}");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                {
+                    _logger.LogError(ex, "Error deleting product | Id: {Id} | CorrelationId={LogGuid}", id, logGuid);
+                }
+
+                TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Deleting Product. Tracking ID: {logGuid}");
             }
         }
     }

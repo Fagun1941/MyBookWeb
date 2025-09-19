@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Serilog; // for LogContext if you use correlation Guid
 
 public class ErrorHandlingMiddleware
 {
@@ -19,16 +20,28 @@ public class ErrorHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception occurred.");
+            var logGuid = context.Items.ContainsKey("LogGuid")
+                ? context.Items["LogGuid"]?.ToString()
+                : Guid.NewGuid().ToString();
+
+            // Push LogGuid into Serilog so it gets written to MSSqlServer
+            using (Serilog.Context.LogContext.PushProperty("LogGuid", logGuid))
+            {
+                Log.Error(ex, "Unhandled exception occurred. CorrelationId={LogGuid}", logGuid);
+            }
 
             // Save error in TempData
             var factory = context.RequestServices.GetRequiredService<ITempDataDictionaryFactory>();
             var tempData = factory.GetTempData(context);
-            tempData["ErrorMessage"] = ex.Message;
+            tempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
+            tempData["ErrorDetails"] = ex.Message;
+
             var provider = context.RequestServices.GetRequiredService<ITempDataProvider>();
             provider.SaveTempData(context, tempData);
-            // Redirect to error page
+
+            context.Response.Clear();
             context.Response.Redirect("/Home/Error");
         }
+
     }
 }

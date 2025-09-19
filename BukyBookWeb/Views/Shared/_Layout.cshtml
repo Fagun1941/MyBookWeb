@@ -127,14 +127,14 @@
             @if (TempData["ToastMessage"] != null)
             {
                     <text>
-                        toastr.success('@TempData["ToastMessage"]', 'Success', { timeOut: 2000 });
+                        toastr.success('@TempData["ToastMessage"]',  { timeOut: 2000 });
                     </text>
             }
-                 @if (TempData["SuccessMessage"] != null)
+            @if (TempData["SuccessMessage"] != null)
             {
-                        <text>
-                                toastr.success('@TempData["SuccessMessage"]', 'Success', { timeOut: 2000 });
-                        </text>
+                <text>
+                    toastr.success('@TempData["SuccessMessage"]', { timeOut: 2000 });
+                </text>
             }
 
         });
