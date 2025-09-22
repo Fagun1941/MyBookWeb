@@ -1,11 +1,11 @@
-﻿using BukyBookWeb.Models;
+﻿using BukyBookWeb.Helpers;
+using BukyBookWeb.Models;
 using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Serilog.Context;
 using System.Net;
-using BukyBookWeb.Helpers;
 
 namespace BukyBookWeb.Controllers
 {
@@ -33,9 +33,6 @@ namespace BukyBookWeb.Controllers
                 ViewBag.TotalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
                 ViewBag.Search = search;
 
-                _logger.LogInformation("Loaded product list | Search: {Search} | Page: {Page}", search, page);
-
-                Response.StatusCode = (int)HttpStatusCode.OK;
                 return View(products);
             }
             catch (Exception ex)
@@ -47,7 +44,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Product. Tracking ID: {logGuid}");
+                return this.HandleError(System.Net.HttpStatusCode.InternalServerError, $"Error Loading Product. Tracking ID: {logGuid}");
             }
         }
 
@@ -59,7 +56,7 @@ namespace BukyBookWeb.Controllers
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name");
                 _logger.LogInformation("Opened Create Product page");
 
-                Response.StatusCode = (int)HttpStatusCode.OK;
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                 return View();
             }
             catch (Exception ex)
@@ -71,7 +68,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Create. Tracking ID: {logGuid}");
+                return this.HandleError(System.Net.HttpStatusCode.InternalServerError, $"Error Loading Create. Tracking ID: {logGuid}");
             }
         }
 
@@ -87,12 +84,12 @@ namespace BukyBookWeb.Controllers
                     _productService.AddProduct(product, file);
                     _logger.LogInformation("Created Product: {ProductName}", product.Title);
 
-                    Response.StatusCode = (int)HttpStatusCode.Created;
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.Created;
                     return RedirectToAction(nameof(Index));
                 }
 
                 _logger.LogWarning("Create Product failed due to invalid model state");
-                Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 return View(product);
             }
@@ -105,7 +102,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Create Product. Tracking ID: {logGuid}");
+                return this.HandleError(System.Net.HttpStatusCode.InternalServerError, $"Error Create Product. Tracking ID: {logGuid}");
             }
         }
 
@@ -118,13 +115,13 @@ namespace BukyBookWeb.Controllers
                 if (product == null)
                 {
                     _logger.LogWarning("Product not found for edit | Id: {Id}", id);
-                    return this.HandleError(HttpStatusCode.NotFound, "Product not found");
+                    return this.HandleError(System.Net.HttpStatusCode.NotFound, "Product not found");
                 }
 
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 _logger.LogInformation("Opened Edit page for Product Id: {Id}", id);
 
-                Response.StatusCode = (int)HttpStatusCode.OK;
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                 return View(product);
             }
             catch (Exception ex)
@@ -136,7 +133,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading product for edit. Tracking ID: {logGuid}");
+                return this.HandleError(System.Net.HttpStatusCode.InternalServerError, $"Error loading product for edit. Tracking ID: {logGuid}");
             }
         }
 
@@ -152,12 +149,12 @@ namespace BukyBookWeb.Controllers
                     _productService.UpdateProduct(product, file);
                     _logger.LogInformation("Updated Product: {ProductName} (Id: {Id})", product.Title, product.Id);
 
-                    Response.StatusCode = (int)HttpStatusCode.OK;
+                    Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                     return RedirectToAction(nameof(Index));
                 }
 
                 _logger.LogWarning("Update Product failed due to invalid model state");
-                Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
                 ViewBag.Categories = new SelectList(_productService.GetCategories(), "Id", "Name", product.CategoryId);
                 return View(product);
             }
@@ -170,7 +167,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Updating Product. Tracking ID: {logGuid}");
+                return this.HandleError(System.Net.HttpStatusCode.InternalServerError, $"Error Updating Product. Tracking ID: {logGuid}");
             }
         }
 
@@ -183,11 +180,11 @@ namespace BukyBookWeb.Controllers
                 if (product == null)
                 {
                     _logger.LogWarning("Product not found for details | Id: {Id}", id);
-                    return this.HandleError(HttpStatusCode.NotFound, "Product not found");
+                    return this.HandleError(System.Net.HttpStatusCode.NotFound, "Product not found");
                 }
 
                 _logger.LogInformation("Viewed Product Details | Id: {Id}", id);
-                Response.StatusCode = (int)HttpStatusCode.OK;
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                 return View(product);
             }
             catch (Exception ex)
@@ -199,7 +196,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Loading Details Product. Tracking ID: {logGuid}");
+                return this.HandleError(System.Net.HttpStatusCode.InternalServerError, $"Error Loading Details Product. Tracking ID: {logGuid}");
             }
         }
 
@@ -213,7 +210,7 @@ namespace BukyBookWeb.Controllers
                 _productService.DeleteProduct(id);
                 _logger.LogInformation("Deleted Product | Id: {Id}", id);
 
-                Response.StatusCode = (int)HttpStatusCode.OK;
+                Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -225,7 +222,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 TempData["ErrorMessage"] = $"Something went wrong. Tracking ID: {logGuid}";
-                return this.HandleError(HttpStatusCode.InternalServerError, $"Error Deleting Product. Tracking ID: {logGuid}");
+                return this.HandleError(System.Net.HttpStatusCode.InternalServerError, $"Error Deleting Product. Tracking ID: {logGuid}");
             }
         }
     }

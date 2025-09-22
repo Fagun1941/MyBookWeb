@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System.Net;
 using Serilog.Context;
-using Microsoft.Extensions.Caching.Memory;
-
 
 namespace BukyBookWeb.Controllers
 {
@@ -15,18 +13,15 @@ namespace BukyBookWeb.Controllers
         private readonly ICategoryService _categoryService;
         private readonly ILogger<CategoryController> _logger;
         private readonly IStringLocalizer<CategoryController> _localizer;
-        private readonly IMemoryCache _cache;
 
         public CategoryController(
             ICategoryService categoryService,
             ILogger<CategoryController> logger,
-            IStringLocalizer<CategoryController> localizer,
-            IMemoryCache cache)
+            IStringLocalizer<CategoryController> localizer)
         {
             _categoryService = categoryService;
             _logger = logger;
             _localizer = localizer;
-            _cache = cache;
         }
 
         public IActionResult Index(string? search, int page = 1)
@@ -34,38 +29,14 @@ namespace BukyBookWeb.Controllers
             try
             {
                 int pageSize = 3;
-                string cacheKey = $"CategoryList_{search}_{page}_{pageSize}";
 
-                if (!_cache.TryGetValue(cacheKey, out IEnumerable<Category> categories))
-                {
-                    categories = _categoryService.GetAllCategory(search, page, pageSize);
-                    int totalCategories = _categoryService.GetTotalCount(search);
+                var categories = _categoryService.GetAllCategory(search, page, pageSize);
+                int totalCategories = _categoryService.GetTotalCount(search);
 
-                    ViewBag.PageNumber = page;
-                    ViewBag.PageSize = pageSize;
-                    ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
-                    ViewBag.Search = search;
-
-                    // Store in cache (expire in 2 minutes, auto-remove if unused for 30 seconds)
-                    var cacheOptions = new MemoryCacheEntryOptions()
-                        .SetSlidingExpiration(TimeSpan.FromSeconds(30))
-                        .SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
-
-                    _cache.Set(cacheKey, categories, cacheOptions);
-
-                    _logger.LogInformation("Stored categories in cache: {CacheKey}", cacheKey);
-                }
-                else
-                {
-                    _logger.LogInformation("Loaded categories from cache: {CacheKey}", cacheKey);
-
-                    // You still need to recalc ViewBag values, even when data is cached
-                    int totalCategories = _categoryService.GetTotalCount(search);
-                    ViewBag.PageNumber = page;
-                    ViewBag.PageSize = pageSize;
-                    ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
-                    ViewBag.Search = search;
-                }
+                ViewBag.PageNumber = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalPages = (int)Math.Ceiling(totalCategories / (double)pageSize);
+                ViewBag.Search = search;
 
                 return View(categories);
             }
@@ -94,8 +65,6 @@ namespace BukyBookWeb.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    ClearCategoryCache();
-
                     TempData["SuccessMessage"] = _localizer["CategoryCreated"].Value;
                     _categoryService.AddCategory(category);
                     return RedirectToAction(nameof(Index));
@@ -123,7 +92,6 @@ namespace BukyBookWeb.Controllers
                 var category = _categoryService.GetByIdCategory(id);
                 if (category == null)
                 {
-                    
                     return this.HandleError(HttpStatusCode.NotFound, "Category not found");
                 }
 
@@ -150,9 +118,6 @@ namespace BukyBookWeb.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                   // ClearCategoryCache();
-
-
                     _categoryService.UpdateCategory(category);
                     return RedirectToAction(nameof(Index));
                 }
@@ -202,8 +167,6 @@ namespace BukyBookWeb.Controllers
         {
             try
             {
-                ClearCategoryCache();
-
                 _categoryService.DeleteCategory(id);
                 return RedirectToAction(nameof(Index));
             }
@@ -215,16 +178,8 @@ namespace BukyBookWeb.Controllers
                     _logger.LogError(ex, "Error deleting category. CorrelationId={LogGuid}", logGuid);
                 }
 
-                
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error deleting category. Tracking ID: {logGuid}");
             }
         }
-        private void ClearCategoryCache()
-        {
-            // In real-world apps, better use IMemoryCache with ICacheEntry tracking
-            // but here we can clear everything
-            (_cache as MemoryCache)?.Compact(1.0);
-        }
-
     }
 }
