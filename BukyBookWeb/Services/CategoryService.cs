@@ -1,6 +1,8 @@
-﻿using BukyBookWeb.IRepository;
+﻿using BukyBookWeb.Helpers;
+using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,32 +12,32 @@ namespace BukyBookWeb.Services
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _repository;
+        private readonly IMemoryCache _cache;
 
-        public CategoryService(ICategoryRepository repository)
+        public CategoryService(ICategoryRepository repository, IMemoryCache cache)
         {
             _repository = repository;
+            _cache = cache; 
         }
 
-        public IEnumerable<Category> GetAllCategory(string search, int page, int pageSize)
+        public IEnumerable<Category> GetAllCategory(string? search, int page, int pageSize)
         {
             try
             {
-                var categories = _repository.GetAllCategory(search, page, pageSize);
-
-                if (!string.IsNullOrWhiteSpace(search))
-                {
-                    categories = categories
-                        .Where(c => c.Name.Contains(search, StringComparison.OrdinalIgnoreCase));
-                }
-
-                return categories.OrderBy(c => c.DisplayOrder);
+                string key = $"Category_{search}_{page}_{pageSize}";
+                return CacheHelper.GetOrSet(_cache, key,
+                    () => _repository.GetAllCategory(search!, page, pageSize),
+                    absolute: TimeSpan.FromMinutes(2),
+                    sliding: TimeSpan.FromSeconds(30));
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error fetching categories with search='{search}': {ex.Message}");
                 throw;
             }
+
         }
+
 
         public Category GetByIdCategory(int id)
         {
@@ -58,6 +60,7 @@ namespace BukyBookWeb.Services
                     throw new ArgumentException("Category name cannot be empty.");
 
                 _repository.AddCategory(category);
+                CacheHelper.Remove(_cache, $"Category_");
             }
             catch (Exception ex)
             {
@@ -71,6 +74,7 @@ namespace BukyBookWeb.Services
             try
             {
                 _repository.UpdateCategory(category);
+                CacheHelper.Remove(_cache, $"Category_");
             }
             catch (Exception ex)
             {
@@ -84,6 +88,7 @@ namespace BukyBookWeb.Services
             try
             {
                 _repository.DeleteCategory(id);
+                CacheHelper.Remove(_cache, $"Category_");
             }
             catch (Exception ex)
             {

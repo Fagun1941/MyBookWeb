@@ -1,6 +1,8 @@
-﻿using BukyBookWeb.Models;
+﻿using BukyBookWeb.Helpers;
+using BukyBookWeb.Models;
 using BukyBookWeb.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,10 +14,12 @@ namespace BukyBookWeb.Services
     {
         private readonly IProductRepository _repository;
         private readonly string _imageFolder;
+        private readonly IMemoryCache _cache;
 
-        public ProductService(IProductRepository repository)
+        public ProductService(IProductRepository repository, IMemoryCache cache)
         {
             _repository = repository;
+            _cache = cache;
             _imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
             if (!Directory.Exists(_imageFolder))
                 Directory.CreateDirectory(_imageFolder);
@@ -25,13 +29,20 @@ namespace BukyBookWeb.Services
         {
             try
             {
-                var products = _repository.GetAllProduct(search, page, pageSize);
-                if (!string.IsNullOrWhiteSpace(search))
-                {
-                    products = products
-                        .Where(c => c.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
-                }
-                return products;
+                //var products = _repository.GetAllProduct(search, page, pageSize);
+                //if (!string.IsNullOrWhiteSpace(search))
+                //{
+                //    products = products
+                //        .Where(c => c.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+                //}
+                //return products;
+
+                string key = $"Product_{search}_{page}_{pageSize}";
+
+                return CacheHelper.GetOrSet(_cache, key,
+                    () => _repository.GetAllProduct(search, page, pageSize),
+                    absolute: TimeSpan.FromMinutes(2),
+                    sliding: TimeSpan.FromSeconds(30));
             }
             catch (Exception ex)
             {
@@ -57,6 +68,7 @@ namespace BukyBookWeb.Services
         {
             try
             {
+                CacheHelper.Remove(_cache, "Product_");
                 HandleFileUpload(product, file);
                 _repository.AddProduct(product);
             }
@@ -71,8 +83,10 @@ namespace BukyBookWeb.Services
         {
             try
             {
+                CacheHelper.Remove(_cache, "Product_");
                 HandleFileUpload(product, file);
                 _repository.UpdateProduct(product);
+                
             }
             catch (Exception ex)
             {
@@ -86,6 +100,7 @@ namespace BukyBookWeb.Services
             try
             {
                 _repository.DeleteProduct(id);
+                CacheHelper.Remove(_cache, "Product_");
             }
             catch (Exception ex)
             {
