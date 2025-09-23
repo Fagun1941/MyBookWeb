@@ -14,12 +14,15 @@ namespace BukyBookWeb.Services
     {
         private readonly IProductRepository _repository;
         private readonly string _imageFolder;
-        private readonly IMemoryCache _cache;
+        //private readonly IMemoryCache _cache;
+        private readonly ICacheService _cacheService;
 
-        public ProductService(IProductRepository repository, IMemoryCache cache)
+        public ProductService(IProductRepository repository, /*IMemoryCache  cache , */ ICacheService cacheService)
         {
             _repository = repository;
-            _cache = cache;
+            _cacheService = cacheService;
+            //_cache = cache;
+
             _imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
             if (!Directory.Exists(_imageFolder))
                 Directory.CreateDirectory(_imageFolder);
@@ -29,20 +32,26 @@ namespace BukyBookWeb.Services
         {
             try
             {
-                //var products = _repository.GetAllProduct(search, page, pageSize);
-                //if (!string.IsNullOrWhiteSpace(search))
-                //{
-                //    products = products
-                //        .Where(c => c.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
-                //}
-                //return products;
 
                 string key = $"Product_{search}_{page}_{pageSize}";
 
-                return CacheHelper.GetOrSet(_cache, key,
-                    () => _repository.GetAllProduct(search, page, pageSize),
-                    absolute: TimeSpan.FromMinutes(2),
-                    sliding: TimeSpan.FromSeconds(30));
+                //return CacheHelper.GetOrSet(_cache, key,
+                //    () => _repository.GetAllProduct(search, page, pageSize),
+                //    absolute: TimeSpan.FromMinutes(2),
+                //    sliding: TimeSpan.FromSeconds(30));
+
+
+                var cacheData = _cacheService.GetAsync<IEnumerable<Product>>(key).Result;
+
+                if(cacheData != null)
+                {
+                    return cacheData;
+                }
+
+                var result = _repository.GetAllProduct(search, page, pageSize);
+                _cacheService.SetAsync(key, result, TimeSpan.FromMinutes(2)).Wait();
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -68,7 +77,8 @@ namespace BukyBookWeb.Services
         {
             try
             {
-                CacheHelper.Remove(_cache, "Product_");
+                //CacheHelper.Remove(_cache, "Product");
+                _cacheService.RemoveByPrefixAsync("Product").Wait();
                 HandleFileUpload(product, file);
                 _repository.AddProduct(product);
             }
@@ -83,7 +93,8 @@ namespace BukyBookWeb.Services
         {
             try
             {
-                CacheHelper.Remove(_cache, "Product_");
+                //CacheHelper.Remove(_cache, "Product_");
+                _cacheService.RemoveByPrefixAsync("Product").Wait();
                 HandleFileUpload(product, file);
                 _repository.UpdateProduct(product);
                 
@@ -99,8 +110,9 @@ namespace BukyBookWeb.Services
         {
             try
             {
+                _cacheService.RemoveByPrefixAsync("Product").Wait();
                 _repository.DeleteProduct(id);
-                CacheHelper.Remove(_cache, "Product_");
+                //CacheHelper.Remove(_cache, "Product_");
             }
             catch (Exception ex)
             {
