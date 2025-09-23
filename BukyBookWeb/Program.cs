@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
+using StackExchange.Redis;
 using System.Globalization;
 using System.Text;
 
@@ -46,6 +47,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
 
+// Register Redis connection
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration = builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost:6379";
+    return ConnectionMultiplexer.Connect(configuration);
+});
 
 
 builder.Services.AddMemoryCache();
@@ -59,6 +66,8 @@ builder.Services.AddScoped<IAdminService,AdminService>();
 builder.Services.AddScoped<IAdminRepository,AdminRepository>();
 builder.Services.AddScoped<ICalculatorRepository, CalculatorReposity>();
 builder.Services.AddScoped<ICalculatorService,CalculatorService>();
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
 
 var app = builder.Build();
 
