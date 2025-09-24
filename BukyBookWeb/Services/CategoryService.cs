@@ -176,25 +176,24 @@ namespace BukyBookWeb.Services
         private readonly ICategoryRepository _repository;
         private readonly ICacheService _cacheService;
 
-       
         public CategoryService(ICategoryRepository repository, ICacheService cacheService)
         {
-            _repository = repository ;
-            _cacheService = cacheService ;
+            _repository = repository;
+            _cacheService = cacheService;
         }
 
-        public IEnumerable<Category> GetAllCategory(string? search, int page, int pageSize)
+        public async Task<IEnumerable<Category>> GetAllCategoryAsync(string? search, int page, int pageSize)
         {
             try
             {
                 string key = $"Category_{search}_{page}_{pageSize}";
 
-                var cachedData = _cacheService.GetAsync<IEnumerable<Category>>(key).Result;
+                var cachedData = await _cacheService.GetAsync<IEnumerable<Category>>(key);
                 if (cachedData != null)
                     return cachedData;
 
-                var result = _repository.GetAllCategory(search!, page, pageSize);
-                _cacheService.SetAsync(key, result, TimeSpan.FromMinutes(2)).Wait();
+                var result = await _repository.GetAllCategoryAsync(search!, page, pageSize);
+                await _cacheService.SetAsync(key, result, TimeSpan.FromMinutes(2));
 
                 return result;
             }
@@ -205,11 +204,11 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public Category GetByIdCategory(int id)
+        public async Task<Category?> GetByIdCategoryAsync(int id)
         {
             try
             {
-                return _repository.GetByIdCategory(id);
+                return await _repository.GetByIdCategoryAsync(id);
             }
             catch (Exception ex)
             {
@@ -218,15 +217,15 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public void AddCategory(Category category)
+        public async Task AddCategoryAsync(Category category)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(category.Name))
                     throw new ArgumentException("Category name cannot be empty.");
 
-                _repository.AddCategory(category);
-                _cacheService.RemoveByPrefixAsync("Category").Wait();
+                await _repository.AddCategoryAsync(category);
+                await _cacheService.RemoveByPrefixAsync("Category");
             }
             catch (Exception ex)
             {
@@ -235,12 +234,12 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public void UpdateCategory(Category category)
+        public async Task UpdateCategoryAsync(Category category)
         {
             try
             {
-                _repository.UpdateCategory(category);
-                _cacheService.RemoveByPrefixAsync("Category").Wait();
+                await _repository.UpdateCategoryAsync(category);
+                await _cacheService.RemoveByPrefixAsync("Category");
             }
             catch (Exception ex)
             {
@@ -249,12 +248,12 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public void DeleteCategory(int id)
+        public async Task DeleteCategoryAsync(int id)
         {
             try
             {
-                _repository.DeleteCategory(id);
-                _cacheService.RemoveByPrefixAsync("Category").Wait();
+                await _repository.DeleteCategoryAsync(id);
+                await _cacheService.RemoveByPrefixAsync("Category");
             }
             catch (Exception ex)
             {
@@ -263,11 +262,11 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public int GetTotalCount(string search)
+        public async Task<int> GetTotalCountAsync(string search)
         {
             try
             {
-                return _repository.GetTotalCategoriesCount(search);
+                return await _repository.GetTotalCategoriesCountAsync(search);
             }
             catch (Exception ex)
             {

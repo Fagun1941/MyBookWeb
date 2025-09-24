@@ -3,6 +3,7 @@ using BukyBookWeb.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace BukyBookWeb.Controllers
 {
@@ -16,21 +17,14 @@ namespace BukyBookWeb.Controllers
             _adminService = adminService;
         }
 
-        // List all users
+        // List all users (sync because service is sync)
         public IActionResult Users()
         {
             try
             {
                 var users = _adminService.GetAllUsers();
 
-                var response = new CommonModel
-                {
-                    Message = "Users loaded successfully",
-                    StatusCode = HttpStatusCode.OK,
-                    Data = users
-                };
-
-                return View(users);
+                return View(users); // No need to wrap in async
             }
             catch (Exception ex)
             {
@@ -50,12 +44,6 @@ namespace BukyBookWeb.Controllers
                 }
 
                 await _adminService.AddAdminRoleAsync(userId);
-
-                var response = new CommonModel
-                {
-                    Message = "User promoted to Admin successfully",
-                    StatusCode = HttpStatusCode.OK
-                };
 
                 return RedirectToAction(nameof(Users));
             }
@@ -77,12 +65,6 @@ namespace BukyBookWeb.Controllers
                 }
 
                 await _adminService.RemoveAdminRoleAsync(userId);
-
-                var response = new CommonModel
-                {
-                    Message = "Admin role removed successfully",
-                    StatusCode = HttpStatusCode.OK
-                };
 
                 return RedirectToAction(nameof(Users));
             }

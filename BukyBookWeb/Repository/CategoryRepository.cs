@@ -1,6 +1,7 @@
 ﻿using BukyBookWeb.Data;
 using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace BukyBookWeb.Repositories
@@ -9,7 +10,7 @@ namespace BukyBookWeb.Repositories
     {
         public CategoryRepository(ApplicationDbContext context) : base(context) { }
 
-        public IEnumerable<Category> GetAllCategory(string? search, int page, int pageSize)
+        public async Task<IEnumerable<Category>> GetAllCategoryAsync(string? search, int page, int pageSize)
         {
             try
             {
@@ -17,7 +18,7 @@ namespace BukyBookWeb.Repositories
                 Expression<Func<Category, bool>>? predicate =
                     string.IsNullOrEmpty(term) ? null : c => c.Name.ToLower().Contains(term.ToLower());
 
-                return GetAll(
+                return await GetAllAsync(
                     term,
                     page,
                     pageSize,
@@ -28,14 +29,15 @@ namespace BukyBookWeb.Repositories
             catch (Exception ex)
             {
                 Console.WriteLine($"Error fetching categories: {ex.Message}");
-                 throw;
+                throw;
             }
         }
-        public Category? GetByIdCategory(int id)
+
+        public async Task<Category?> GetByIdCategoryAsync(int id)
         {
             try
             {
-                return GetById(id);
+                return await GetByIdAsync(id);
             }
             catch (Exception ex)
             {
@@ -44,11 +46,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public void AddCategory(Category category)
+        public async Task AddCategoryAsync(Category category)
         {
             try
             {
-                Add(category);
+                await AddAsync(category);
             }
             catch (Exception ex)
             {
@@ -57,11 +59,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public void UpdateCategory(Category category)
+        public async Task UpdateCategoryAsync(Category category)
         {
             try
             {
-                Update(category);
+                await UpdateAsync(category);
             }
             catch (Exception ex)
             {
@@ -70,11 +72,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public void DeleteCategory(int id)
+        public async Task DeleteCategoryAsync(int id)
         {
             try
             {
-                Delete(id);
+                await DeleteAsync(id);
             }
             catch (Exception ex)
             {
@@ -83,11 +85,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public int GetTotalCategoriesCount(string search)
+        public async Task<int> GetTotalCategoriesCountAsync(string search)
         {
             try
             {
-                return GetTotalCount(string.IsNullOrEmpty(search)
+                return await GetTotalCountAsync(string.IsNullOrEmpty(search)
                     ? null
                     : c => c.Name.Contains(search));
             }
@@ -97,6 +99,5 @@ namespace BukyBookWeb.Repositories
                 throw;
             }
         }
-
     }
 }

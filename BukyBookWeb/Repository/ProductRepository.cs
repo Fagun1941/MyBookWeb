@@ -1,6 +1,10 @@
 ﻿using BukyBookWeb.Data;
+using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BukyBookWeb.Repositories
 {
@@ -8,17 +12,19 @@ namespace BukyBookWeb.Repositories
     {
         public ProductRepository(ApplicationDbContext db) : base(db) { }
 
-        public IEnumerable<Product> GetAllProduct(string search, int page, int pageSize)
+        public async Task<IEnumerable<Product>> GetAllProductAsync(string search, int page, int pageSize)
         {
             try
             {
-                return GetAll(
-                    search,
-                    page,
-                    pageSize,
-                    p => p.Title.ToLower().Contains(search.ToLower()),
-                    q => q.OrderBy(p => p.Id),
-                    p => p.Category
+                return await Task.Run(() =>
+                    GetAllAsync(
+                        search,
+                        page,
+                        pageSize,
+                        p => p.Title.ToLower().Contains(search.ToLower()),
+                        q => q.OrderBy(p => p.Id),
+                        p => p.Category
+                    )
                 );
             }
             catch (Exception ex)
@@ -28,13 +34,13 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public Product? GetByIdProduct(int id)
+        public async Task<Product?> GetByIdProductAsync(int id)
         {
             try
             {
-                return _context.Products?
-                               .Include(p => p.Category)
-                               .FirstOrDefault(p => p.Id == id);
+                return await _context.Products?
+                    .Include(p => p.Category)
+                    .FirstOrDefaultAsync(p => p.Id == id);
             }
             catch (Exception ex)
             {
@@ -43,11 +49,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public void AddProduct(Product product)
+        public async Task AddProductAsync(Product product)
         {
             try
             {
-                Add(product);
+                await Task.Run(() => AddAsync(product));
             }
             catch (Exception ex)
             {
@@ -56,11 +62,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public void UpdateProduct(Product product)
+        public async Task UpdateProductAsync(Product product)
         {
             try
             {
-                Update(product);
+                await Task.Run(() => UpdateAsync(product));
             }
             catch (Exception ex)
             {
@@ -69,11 +75,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public void DeleteProduct(int id)
+        public async Task DeleteProductAsync(int id)
         {
             try
             {
-                Delete(id);
+                await Task.Run(() => DeleteAsync(id));
             }
             catch (Exception ex)
             {
@@ -82,11 +88,11 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public IEnumerable<Category> GetCategories()
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
             try
             {
-                return _context.Categories.ToList();
+                return await _context.Categories.ToListAsync();
             }
             catch (Exception ex)
             {
@@ -95,13 +101,15 @@ namespace BukyBookWeb.Repositories
             }
         }
 
-        public int GetTotalProductCount(string search)
+        public async Task<int> GetTotalProductCountAsync(string search)
         {
             try
             {
-                return GetTotalCount(string.IsNullOrEmpty(search)
-                    ? null
-                    : p => p.Title.Contains(search));
+                return await Task.Run(() =>
+                    GetTotalCountAsync(string.IsNullOrEmpty(search)
+                        ? null
+                        : p => p.Title.Contains(search))
+                );
             }
             catch (Exception ex)
             {

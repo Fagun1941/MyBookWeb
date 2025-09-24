@@ -24,14 +24,14 @@ namespace BukyBookWeb.Controllers
             _localizer = localizer;
         }
 
-        public IActionResult Index(string? search, int page = 1)
+        public async Task<IActionResult> Index(string? search, int page = 1)
         {
             try
             {
                 int pageSize = 3;
 
-                var categories = _categoryService.GetAllCategory(search, page, pageSize);
-                int totalCategories = _categoryService.GetTotalCount(search);
+                var categories = await _categoryService.GetAllCategoryAsync(search, page, pageSize);
+                int totalCategories = await _categoryService.GetTotalCountAsync(search);
 
                 ViewBag.PageNumber = page;
                 ViewBag.PageSize = pageSize;
@@ -59,14 +59,14 @@ namespace BukyBookWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Category category)
+        public async Task<IActionResult> Create(Category category)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
                     TempData["SuccessMessage"] = _localizer["CategoryCreated"].Value;
-                    _categoryService.AddCategory(category);
+                    await _categoryService.AddCategoryAsync(category);
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -85,11 +85,11 @@ namespace BukyBookWeb.Controllers
             }
         }
 
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                var category = _categoryService.GetByIdCategory(id);
+                var category = await _categoryService.GetByIdCategoryAsync(id);
                 if (category == null)
                 {
                     return this.HandleError(HttpStatusCode.NotFound, "Category not found");
@@ -112,13 +112,13 @@ namespace BukyBookWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Category category)
+        public async Task<IActionResult> Edit(Category category)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _categoryService.UpdateCategory(category);
+                    await _categoryService.UpdateCategoryAsync(category);
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -137,11 +137,11 @@ namespace BukyBookWeb.Controllers
             }
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var category = _categoryService.GetByIdCategory(id);
+                var category = await _categoryService.GetByIdCategoryAsync(id);
                 if (category == null)
                 {
                     return this.HandleError(HttpStatusCode.NotFound, "Category not found");
@@ -163,11 +163,11 @@ namespace BukyBookWeb.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int id)
+        public async Task<IActionResult> DeletePost(int id)
         {
             try
             {
-                _categoryService.DeleteCategory(id);
+                await _categoryService.DeleteCategoryAsync(id);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

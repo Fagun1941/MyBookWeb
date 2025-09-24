@@ -47,13 +47,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied"; 
 });
 
-// Register Redis connection
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var configuration = builder.Configuration.GetConnectionString("RedisConnection") ?? "localhost:6379";
     return ConnectionMultiplexer.Connect(configuration);
 });
-
 
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -68,10 +66,7 @@ builder.Services.AddScoped<ICalculatorRepository, CalculatorReposity>();
 builder.Services.AddScoped<ICalculatorService,CalculatorService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
-
 var app = builder.Build();
-
-
 
 var supportedCultures = new[] { "en-US", "bn-BD" };
 var localizationOptions = new RequestLocalizationOptions
@@ -82,7 +77,6 @@ var localizationOptions = new RequestLocalizationOptions
 };
 
 app.UseRequestLocalization(localizationOptions);
-
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
@@ -96,7 +90,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
