@@ -17,7 +17,7 @@ namespace BukyBookWeb.Services
             _cache = cache;
             _connection = connection;
 
-            // Configure JsonSerializer to handle circular references
+            
             _jsonOptions = new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.Preserve,
@@ -43,13 +43,13 @@ namespace BukyBookWeb.Services
             if (slidingExpireTime.HasValue)
                 options.SlidingExpiration = slidingExpireTime;
 
-            // Use JsonSerializer with ReferenceHandler.Preserve
+           
             var serialized = JsonSerializer.Serialize(value, _jsonOptions);
             await _cache.SetStringAsync(key, serialized, options);
 
-            // Track keys for prefix-based invalidation
+            
             var db = _connection.GetDatabase();
-            var prefix = key.Split('_')[0]; // e.g., "Category"
+            var prefix = key.Split('_')[0]; 
             await db.SetAddAsync($"CacheKeys:{prefix}", key);
         }
 

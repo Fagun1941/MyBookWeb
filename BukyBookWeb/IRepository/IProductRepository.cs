@@ -1,16 +1,17 @@
 ﻿using BukyBookWeb.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace BukyBookWeb.Repositories
+namespace BukyBookWeb.IRepository
 {
     public interface IProductRepository
     {
-        IEnumerable<Product> GetAllProduct(string search, int page, int pageSize);
-        Product? GetByIdProduct(int id);
-        void AddProduct(Product product);
-        void UpdateProduct(Product product);
-        void DeleteProduct(int id);
-        IEnumerable<Category> GetCategories();
-        int GetTotalProductCount(string search);
+        Task<IEnumerable<Product>> GetAllProductAsync(string search, int page, int pageSize);
+        Task<Product?> GetByIdProductAsync(int id);
+        Task AddProductAsync(Product product);
+        Task UpdateProductAsync(Product product);
+        Task DeleteProductAsync(int id);
+        Task<IEnumerable<Category>> GetCategoriesAsync();
+        Task<int> GetTotalProductCountAsync(string search);
     }
 }

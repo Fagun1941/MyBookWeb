@@ -1,15 +1,14 @@
 ﻿using BukyBookWeb.Models;
-using System.Collections.Generic;
 
 namespace BukyBookWeb.Services
 {
     public interface ICategoryService
     {
-        IEnumerable<Category> GetAllCategory(string search, int page, int pageSize);
-        Category GetByIdCategory(int id);
-        void AddCategory(Category category);
-        void UpdateCategory(Category category);
-        void DeleteCategory(int id);
-        int GetTotalCount(string search);
+        Task<IEnumerable<Category>> GetAllCategoryAsync(string? search, int page, int pageSize);
+        Task<int> GetTotalCountAsync(string? search);
+        Task<Category?> GetByIdCategoryAsync(int id);
+        Task AddCategoryAsync(Category category);
+        Task UpdateCategoryAsync(Category category);
+        Task DeleteCategoryAsync(int id);
     }
 }

@@ -25,16 +25,16 @@ namespace BukyBookWeb.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
             try
             {
                 _logger.LogInformation("Register page loaded");
-                return View();
+                return await Task.FromResult(View());
             }
             catch (Exception ex)
             {
-                return LogAndHandleError(ex, "Error loading Register page");
+                return await Task.FromResult(LogAndHandleError(ex, "Error loading Register page"));
             }
         }
 
@@ -45,7 +45,7 @@ namespace BukyBookWeb.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                    return HandleError(HttpStatusCode.BadRequest, "Invalid registration data", model);
+                    return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Invalid registration data", model));
 
                 var result = await _accountService.RegisterAsync(model);
 
@@ -58,25 +58,25 @@ namespace BukyBookWeb.Controllers
                 foreach (var error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
 
-                return HandleError(HttpStatusCode.BadRequest, "Registration failed", model);
+                return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Registration failed", model));
             }
             catch (Exception ex)
             {
-                return LogAndHandleError(ex, "Error during registration", model);
+                return await Task.FromResult(LogAndHandleError(ex, "Error during registration", model));
             }
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
             try
             {
                 _logger.LogInformation("Login page loaded");
-                return View();
+                return await Task.FromResult(View());
             }
             catch (Exception ex)
             {
-                return LogAndHandleError(ex, "Error loading Login page");
+                return await Task.FromResult(LogAndHandleError(ex, "Error loading Login page"));
             }
         }
 
@@ -87,7 +87,7 @@ namespace BukyBookWeb.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                    return HandleError(HttpStatusCode.BadRequest, "Invalid login data", model);
+                    return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Invalid login data", model));
 
                 var result = await _accountService.LoginAsync(model);
 
@@ -99,11 +99,11 @@ namespace BukyBookWeb.Controllers
                 }
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return HandleError(HttpStatusCode.BadRequest, "Login failed", model);
+                return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Login failed", model));
             }
             catch (Exception ex)
             {
-                return LogAndHandleError(ex, "Error during login", model);
+                return await Task.FromResult(LogAndHandleError(ex, "Error during login", model));
             }
         }
 
@@ -119,7 +119,7 @@ namespace BukyBookWeb.Controllers
             }
             catch (Exception ex)
             {
-                return LogAndHandleError(ex, "Error during logout");
+                return await Task.FromResult(LogAndHandleError(ex, "Error during logout"));
             }
         }
 

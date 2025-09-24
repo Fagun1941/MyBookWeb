@@ -1,12 +1,11 @@
 ﻿using BukyBookWeb.Helpers;
+using BukyBookWeb.IRepository;
 using BukyBookWeb.Models;
-using BukyBookWeb.Repositories;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace BukyBookWeb.Services
 {
@@ -28,11 +27,10 @@ namespace BukyBookWeb.Services
                 Directory.CreateDirectory(_imageFolder);
         }
 
-        public IEnumerable<Product> GetAllProduct(string search, int page, int pageSize)
+        public async Task<IEnumerable<Product>> GetAllProductAsync(string search, int page, int pageSize)
         {
             try
             {
-
                 string key = $"Product_{search}_{page}_{pageSize}";
 
                 //return CacheHelper.GetOrSet(_cache, key,
@@ -40,16 +38,12 @@ namespace BukyBookWeb.Services
                 //    absolute: TimeSpan.FromMinutes(2),
                 //    sliding: TimeSpan.FromSeconds(30));
 
-
-                var cacheData = _cacheService.GetAsync<IEnumerable<Product>>(key).Result;
-
-                if(cacheData != null)
-                {
+                var cacheData = await _cacheService.GetAsync<IEnumerable<Product>>(key);
+                if (cacheData != null)
                     return cacheData;
-                }
 
-                var result = _repository.GetAllProduct(search, page, pageSize);
-                _cacheService.SetAsync(key, result, TimeSpan.FromMinutes(2)).Wait();
+                var result = await _repository.GetAllProductAsync(search, page, pageSize);
+                await _cacheService.SetAsync(key, result, TimeSpan.FromMinutes(2));
 
                 return result;
             }
@@ -60,11 +54,11 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public Product GetByIdProduct(int id)
+        public async Task<Product> GetByIdProductAsync(int id)
         {
             try
             {
-                return _repository.GetByIdProduct(id);
+                return await _repository.GetByIdProductAsync(id);
             }
             catch (Exception ex)
             {
@@ -73,14 +67,14 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public void AddProduct(Product product, IFormFile? file)
+        public async Task AddProductAsync(Product product, IFormFile? file)
         {
             try
             {
                 //CacheHelper.Remove(_cache, "Product");
-                _cacheService.RemoveByPrefixAsync("Product").Wait();
-                HandleFileUpload(product, file);
-                _repository.AddProduct(product);
+                await _cacheService.RemoveByPrefixAsync("Product");
+                await HandleFileUploadAsync(product, file);
+                await _repository.AddProductAsync(product);
             }
             catch (Exception ex)
             {
@@ -89,15 +83,14 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public void UpdateProduct(Product product, IFormFile? file)
+        public async Task UpdateProductAsync(Product product, IFormFile? file)
         {
             try
             {
                 //CacheHelper.Remove(_cache, "Product_");
-                _cacheService.RemoveByPrefixAsync("Product").Wait();
-                HandleFileUpload(product, file);
-                _repository.UpdateProduct(product);
-                
+                await _cacheService.RemoveByPrefixAsync("Product");
+                await HandleFileUploadAsync(product, file);
+                await _repository.UpdateProductAsync(product);
             }
             catch (Exception ex)
             {
@@ -106,12 +99,12 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public void DeleteProduct(int id)
+        public async Task DeleteProductAsync(int id)
         {
             try
             {
-                _cacheService.RemoveByPrefixAsync("Product").Wait();
-                _repository.DeleteProduct(id);
+                await _cacheService.RemoveByPrefixAsync("Product");
+                await _repository.DeleteProductAsync(id);
                 //CacheHelper.Remove(_cache, "Product_");
             }
             catch (Exception ex)
@@ -121,11 +114,11 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public IEnumerable<Category> GetCategories()
+        public async Task<IEnumerable<Category>> GetCategoriesAsync()
         {
             try
             {
-                return _repository.GetCategories();
+                return await _repository.GetCategoriesAsync();
             }
             catch (Exception ex)
             {
@@ -134,7 +127,7 @@ namespace BukyBookWeb.Services
             }
         }
 
-        private void HandleFileUpload(Product product, IFormFile? file)
+        private async Task HandleFileUploadAsync(Product product, IFormFile? file)
         {
             if (file == null || file.Length == 0) return;
 
@@ -145,7 +138,7 @@ namespace BukyBookWeb.Services
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    file.CopyTo(stream);
+                    await file.CopyToAsync(stream);
                 }
 
                 product.ImageUrl = "/images/products/" + fileName;
@@ -157,11 +150,11 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public int GetTotalCountProduct(string search)
+        public async Task<int> GetTotalCountProductAsync(string search)
         {
             try
             {
-                return _repository.GetTotalProductCount(search);
+                return await _repository.GetTotalProductCountAsync(search);
             }
             catch (Exception ex)
             {
