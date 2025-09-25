@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System.Net;
 using Serilog.Context;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BukyBookWeb.Controllers
 {
+
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
