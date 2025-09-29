@@ -32,9 +32,9 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DefultConnection")
-    ));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -65,6 +65,10 @@ builder.Services.AddScoped<IAdminRepository,AdminRepository>();
 builder.Services.AddScoped<ICalculatorRepository, CalculatorReposity>();
 builder.Services.AddScoped<ICalculatorService,CalculatorService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 
 var app = builder.Build();
 
@@ -109,6 +113,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     await SeedData.Initialize(services);
 }
+
 
 app.MapControllerRoute(
     name: "default",

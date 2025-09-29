@@ -164,10 +164,13 @@
 
 
 using BukyBookWeb.IRepository;
+using BukyBookWeb.IService;
 using BukyBookWeb.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace BukyBookWeb.Services
 {
@@ -175,13 +178,23 @@ namespace BukyBookWeb.Services
     {
         private readonly ICategoryRepository _repository;
         private readonly ICacheService _cacheService;
+        private readonly IAuditService _auditService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CategoryService(ICategoryRepository repository, ICacheService cacheService)
+
+
+        public CategoryService(ICategoryRepository repository, ICacheService cacheService, IAuditService auditService, IHttpContextAccessor httpContextAccessor)
         {
             _repository = repository;
             _cacheService = cacheService;
+            _auditService = auditService;
+            _httpContextAccessor = httpContextAccessor;
         }
-
+        private string GetCurrentUser()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            return user?.Identity?.Name ?? "Unknown";
+        }
         public async Task<IEnumerable<Category>> GetAllCategoryAsync(string? search, int page, int pageSize)
         {
             try
@@ -238,8 +251,17 @@ namespace BukyBookWeb.Services
         {
             try
             {
+
                 await _repository.UpdateCategoryAsync(category);
                 await _cacheService.RemoveByPrefixAsync("Category");
+                await _auditService.AddAsync(new AuditLog
+                {
+                    EnityName = "Category",
+                    EntityId = category.Id,
+                    Action = "Update",
+                    UserName = GetCurrentUser(),
+                    TimeAction = DateTime.UtcNow
+                });
             }
             catch (Exception ex)
             {
@@ -254,6 +276,14 @@ namespace BukyBookWeb.Services
             {
                 await _repository.DeleteCategoryAsync(id);
                 await _cacheService.RemoveByPrefixAsync("Category");
+                await _auditService.AddAsync(new AuditLog
+                {
+                    EnityName = "Category",
+                    EntityId = id,
+                    Action = "Delete",
+                    UserName = GetCurrentUser(),
+                    TimeAction = DateTime.UtcNow
+                });
             }
             catch (Exception ex)
             {
@@ -274,5 +304,7 @@ namespace BukyBookWeb.Services
                 throw;
             }
         }
+     
+
     }
 }
