@@ -1,11 +1,14 @@
 ﻿using BukyBookWeb.Helpers;
 using BukyBookWeb.IRepository;
+using BukyBookWeb.IService;
 using BukyBookWeb.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace BukyBookWeb.Services
 {
@@ -15,12 +18,22 @@ namespace BukyBookWeb.Services
         private readonly string _imageFolder;
         //private readonly IMemoryCache _cache;
         private readonly ICacheService _cacheService;
+        private readonly IAuditService _auditService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProductService(IProductRepository repository, /*IMemoryCache  cache , */ ICacheService cacheService)
+        private string GetCurrentUser()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            return user?.Identity?.Name ?? "Unknown";
+        }
+
+        public ProductService(IProductRepository repository, /*IMemoryCache  cache , */ ICacheService cacheService, IAuditService auditService, IHttpContextAccessor httpContextAccessor)
         {
             _repository = repository;
             _cacheService = cacheService;
             //_cache = cache;
+            _auditService = auditService;
+            _httpContextAccessor = httpContextAccessor;
 
             _imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
             if (!Directory.Exists(_imageFolder))
@@ -91,6 +104,14 @@ namespace BukyBookWeb.Services
                 await _cacheService.RemoveByPrefixAsync("Product");
                 await HandleFileUploadAsync(product, file);
                 await _repository.UpdateProductAsync(product);
+                await _auditService.AddAsync(new AuditLog
+                {
+                    EnityName = "Product",
+                    EntityId = product.Id,
+                    Action = "Update",
+                    UserName = GetCurrentUser(),
+                    TimeAction = DateTime.UtcNow
+                });
             }
             catch (Exception ex)
             {
@@ -106,6 +127,14 @@ namespace BukyBookWeb.Services
                 await _cacheService.RemoveByPrefixAsync("Product");
                 await _repository.DeleteProductAsync(id);
                 //CacheHelper.Remove(_cache, "Product_");
+                await _auditService.AddAsync(new AuditLog
+                {
+                    EnityName = "Product",
+                    EntityId = id,
+                    Action = "Update",
+                    UserName = GetCurrentUser(),
+                    TimeAction = DateTime.UtcNow
+                });
             }
             catch (Exception ex)
             {

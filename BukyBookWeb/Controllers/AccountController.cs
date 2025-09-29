@@ -45,7 +45,7 @@ namespace BukyBookWeb.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                    return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Invalid registration data", model));
+                    return View(model);
 
                 var result = await _accountService.RegisterAsync(model);
 
@@ -58,7 +58,7 @@ namespace BukyBookWeb.Controllers
                 foreach (var error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
 
-                return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Registration failed", model));
+                return View(model);// await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Registration failed", model));
             }
             catch (Exception ex)
             {
@@ -99,7 +99,7 @@ namespace BukyBookWeb.Controllers
                 }
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Login failed", model));
+                return View(model); //await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Login failed", model));
             }
             catch (Exception ex)
             {

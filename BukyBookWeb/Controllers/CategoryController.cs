@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System.Net;
 using Serilog.Context;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BukyBookWeb.Controllers
 {
+
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
@@ -56,7 +58,7 @@ namespace BukyBookWeb.Controllers
         {
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Category category)
@@ -84,7 +86,7 @@ namespace BukyBookWeb.Controllers
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error creating category. Tracking ID: {logGuid}");
             }
         }
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -109,7 +111,7 @@ namespace BukyBookWeb.Controllers
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error editing category. Tracking ID: {logGuid}");
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Category category)
@@ -136,7 +138,7 @@ namespace BukyBookWeb.Controllers
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error updating category. Tracking ID: {logGuid}");
             }
         }
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -160,7 +162,7 @@ namespace BukyBookWeb.Controllers
                 return this.HandleError(HttpStatusCode.InternalServerError, $"Error loading delete page. Tracking ID: {logGuid}");
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePost(int id)

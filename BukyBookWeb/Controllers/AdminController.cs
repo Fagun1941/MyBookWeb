@@ -17,14 +17,13 @@ namespace BukyBookWeb.Controllers
             _adminService = adminService;
         }
 
-        // List all users (sync because service is sync)
         public IActionResult Users()
         {
             try
             {
                 var users = _adminService.GetAllUsers();
 
-                return View(users); // No need to wrap in async
+                return View(users); 
             }
             catch (Exception ex)
             {
@@ -32,7 +31,7 @@ namespace BukyBookWeb.Controllers
             }
         }
 
-        // Make user Admin
+        
         [HttpPost]
         public async Task<IActionResult> MakeAdmin(string userId)
         {
@@ -53,7 +52,7 @@ namespace BukyBookWeb.Controllers
             }
         }
 
-        // Remove Admin role
+       
         [HttpPost]
         public async Task<IActionResult> RemoveAdmin(string userId)
         {
@@ -74,7 +73,6 @@ namespace BukyBookWeb.Controllers
             }
         }
 
-        // 🔹 Centralized error handling
         private IActionResult HandleError(HttpStatusCode statusCode, string message)
         {
             var errorModel = new CommonModel

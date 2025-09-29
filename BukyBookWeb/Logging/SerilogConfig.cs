@@ -26,7 +26,7 @@ namespace BukyBookWeb.Logging
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                 )
                 .WriteTo.MSSqlServer(
-                    connectionString: builder.Configuration.GetConnectionString("DefultConnection"),
+                    connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
                     sinkOptions: new MSSqlServerSinkOptions
                     {
                         TableName = "Logs",

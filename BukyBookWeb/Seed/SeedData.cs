@@ -10,25 +10,23 @@ namespace BukyBookWeb.Data
     {
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            // Get RoleManager and UserManager from service provider
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>(); 
 
-            // Define roles
+           
             string[] roleNames = { "Admin", "User" };
 
             foreach (var roleName in roleNames)
             {
-                // Check if role exists
+              
                 var roleExist = await roleManager.RoleExistsAsync(roleName);
                 if (!roleExist)
                 {
-                    // Create role
+                  
                     await roleManager.CreateAsync(new IdentityRole(roleName));
                 }
             }
 
-            // Create default admin user
             var adminEmail = "admin@bookstore.com";
             var adminPassword = "Admin@123";
 
