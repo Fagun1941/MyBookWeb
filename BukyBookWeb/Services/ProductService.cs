@@ -104,14 +104,30 @@ namespace BukyBookWeb.Services
                 await _cacheService.RemoveByPrefixAsync("Product");
                 await HandleFileUploadAsync(product, file);
                 await _repository.UpdateProductAsync(product);
-                await _auditService.AddAsync(new AuditLog
+
+                var changes = new List<string>();
+
+                foreach (var prop in typeof(Product).GetProperties())
                 {
-                    EnityName = "Product",
-                    EntityId = product.Id,
-                    Action = "Update",
-                    UserName = GetCurrentUser(),
-                    TimeAction = DateTime.UtcNow
-                });
+                    var newValue = prop.GetValue(product)?.ToString();
+                    if (!string.IsNullOrEmpty(newValue))
+                    {
+                        changes.Add($"{prop.Name} = {newValue}");
+                    }
+                }
+
+                if (changes.Count > 0)
+                {
+                    await _auditService.AddAsync(new AuditLog
+                    {
+                        EnityName = "Product",
+                        EntityId = product.Id,
+                        Action = "Update",
+                        UserName = GetCurrentUser(),
+                        TimeAction = DateTime.UtcNow,
+                        ChangeDetails = string.Join(", ", changes)
+                    });
+                }
             }
             catch (Exception ex)
             {
