@@ -17,5 +17,7 @@ namespace BukyBookWeb.Models
         [Required]
         public required DateTime TimeAction { get; set; }  
 
+        public String? ChangeDetails { get; set; }
+
     }
 }

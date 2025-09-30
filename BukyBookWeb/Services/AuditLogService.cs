@@ -19,7 +19,7 @@ namespace BukyBookWeb.Services
             if (auditLog == null)
                 throw new ArgumentNullException(nameof(auditLog));
 
-            auditLog.TimeAction = DateTime.UtcNow;
+            auditLog.TimeAction = DateTime.Now;
 
             _context.AuditLogs.Add(auditLog);
             await _context.SaveChangesAsync();
