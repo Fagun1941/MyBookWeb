@@ -19,5 +19,9 @@ namespace BukyBookWeb.Models
         [Required]
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
+        public  string? createby { get; set; }
+        public DateTime createtime { get; set; } = DateTime.Now;
+        public string? updateby { get; set; } = string.Empty;
+        public DateTime? updateTime { get; set; } 
     }
 }

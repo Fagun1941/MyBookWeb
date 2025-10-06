@@ -4,6 +4,7 @@ using BukyBookWeb.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BukyBookWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251006053111_add new field createby,time updateby,time")]
+    partial class addnewfieldcreatebytimeupdatebytime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -189,15 +192,17 @@ namespace BukyBookWeb.Migrations
                         .HasColumnName("ValidTo");
 
                     b.Property<string>("createby")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("createtime")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("updateTime")
+                    b.Property<DateTime>("updateTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("updateby")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

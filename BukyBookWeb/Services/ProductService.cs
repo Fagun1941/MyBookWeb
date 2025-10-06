@@ -40,7 +40,7 @@ namespace BukyBookWeb.Services
                 Directory.CreateDirectory(_imageFolder);
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductAsync(string search, int page, int pageSize)
+        public async Task<IEnumerable<Product>> GetAllProductAsync(string? search, int page, int pageSize)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace BukyBookWeb.Services
                 if (cacheData != null)
                     return cacheData;
 
-                var result = await _repository.GetAllProductAsync(search, page, pageSize);
+                var result = await _repository.GetAllProductAsync(search!, page, pageSize);
                 await _cacheService.SetAsync(key, result, TimeSpan.FromMinutes(2));
 
                 return result;
@@ -67,7 +67,7 @@ namespace BukyBookWeb.Services
             }
         }
 
-        public async Task<Product> GetByIdProductAsync(int id)
+        public async Task<Product?> GetByIdProductAsync(int id)
         {
             try
             {
@@ -84,9 +84,10 @@ namespace BukyBookWeb.Services
         {
             try
             {
-                //CacheHelper.Remove(_cache, "Product");
                 await _cacheService.RemoveByPrefixAsync("Product");
                 await HandleFileUploadAsync(product, file);
+                product.createby = GetCurrentUser();
+                product.createtime = DateTime.Now;
                 await _repository.AddProductAsync(product);
             }
             catch (Exception ex)
@@ -100,9 +101,12 @@ namespace BukyBookWeb.Services
         {
             try
             {
-                //CacheHelper.Remove(_cache, "Product_");
+                
                 await _cacheService.RemoveByPrefixAsync("Product");
+               
                 await HandleFileUploadAsync(product, file);
+                product.updateby = GetCurrentUser();
+                product.updateTime = DateTime.Now;
                 await _repository.UpdateProductAsync(product);
 
                 var changes = new List<string>();
@@ -124,7 +128,7 @@ namespace BukyBookWeb.Services
                         EntityId = product.Id,
                         Action = "Update",
                         UserName = GetCurrentUser(),
-                        TimeAction = DateTime.UtcNow,
+                        TimeAction = DateTime.Now,
                         ChangeDetails = string.Join(", ", changes)
                     });
                 }

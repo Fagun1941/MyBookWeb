@@ -22,14 +22,14 @@ namespace BukyBookWeb.Data
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId);
 
-            modelBuilder.Entity<Product>()
-        .ToTable("Products", b => b.IsTemporal(
-            t =>
-            {
-                t.HasPeriodStart("ValidFrom");   // Column for row start
-                t.HasPeriodEnd("ValidTo");       // Column for row end
-                t.UseHistoryTable("ProductsHistory"); // History table name
-            }));
+                modelBuilder.Entity<Product>()
+                .ToTable("Products", b => b.IsTemporal(
+                    t =>
+                    {
+                        t.HasPeriodStart("ValidFrom");   
+                        t.HasPeriodEnd("ValidTo");       
+                        t.UseHistoryTable("ProductsHistory"); 
+                }));
         }
 
     }
