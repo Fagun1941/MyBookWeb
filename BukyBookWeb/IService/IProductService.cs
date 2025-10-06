@@ -14,5 +14,6 @@ namespace BukyBookWeb.Services
         Task UpdateProductAsync(Product product, IFormFile? file);
         Task DeleteProductAsync(int id);
         Task<IEnumerable<Category>> GetCategoriesAsync();
+        Task<IEnumerable<Author>> GetAllAuthorsAsync();
     }
 }

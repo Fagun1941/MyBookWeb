@@ -12,6 +12,7 @@ namespace BukyBookWeb.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<Author> Authors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,7 +23,12 @@ namespace BukyBookWeb.Data
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId);
 
-                modelBuilder.Entity<Product>()
+            modelBuilder.Entity<Product>()
+               .HasOne(p => p.Author)
+               .WithMany(c => c.Products)
+               .HasForeignKey(p => p.AuthorId);
+
+            modelBuilder.Entity<Product>()
                 .ToTable("Products", b => b.IsTemporal(
                     t =>
                     {

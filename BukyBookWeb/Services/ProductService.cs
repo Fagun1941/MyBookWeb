@@ -176,6 +176,19 @@ namespace BukyBookWeb.Services
             }
         }
 
+        public async Task<IEnumerable<Author>> GetAllAuthorsAsync()
+        {
+            try
+            {
+                return await _repository.GetAllAuthorAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching categories: {ex.Message}");
+                throw;
+            }
+        }
+
         private async Task HandleFileUploadAsync(Product product, IFormFile? file)
         {
             if (file == null || file.Length == 0) return;

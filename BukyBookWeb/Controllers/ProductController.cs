@@ -53,6 +53,7 @@ namespace BukyBookWeb.Controllers
             try
             {
                 ViewBag.Categories = new SelectList(await _productService.GetCategoriesAsync(), "Id", "Name");
+                ViewBag.Authors = new SelectList(await _productService.GetAllAuthorsAsync(), "AuthorId", "AuthorName");
                 _logger.LogInformation("Opened Create Product page");
                 Response.StatusCode = (int)HttpStatusCode.OK;
                 return View();

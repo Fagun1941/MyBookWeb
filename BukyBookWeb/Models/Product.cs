@@ -12,8 +12,6 @@ namespace BukyBookWeb.Models
         [StringLength(200, MinimumLength = 5, ErrorMessage = "Description must be between 5 and 200 characters.")]
         public required string Description { get; set; }
         [Required]
-        public required string Author { get; set; }
-        [Required]
         public double Price { get; set; }
         public string? ImageUrl { get; set; }
         [Required]
@@ -23,5 +21,9 @@ namespace BukyBookWeb.Models
         public DateTime createtime { get; set; } = DateTime.Now;
         public string? updateby { get; set; } = string.Empty;
         public DateTime? updateTime { get; set; } 
+
+        public int AuthorId { get; set; }
+
+        public Author? Author { get; set; }
     }
 }
