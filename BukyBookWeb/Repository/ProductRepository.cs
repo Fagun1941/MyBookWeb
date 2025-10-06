@@ -101,6 +101,19 @@ namespace BukyBookWeb.Repositories
             }
         }
 
+        public async Task<IEnumerable<Author>> GetAllAuthorAsync()
+        {
+            try
+            {
+                return await _context.Authors.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching Authors: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<int> GetTotalProductCountAsync(string search)
         {
             try

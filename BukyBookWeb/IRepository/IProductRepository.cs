@@ -12,6 +12,7 @@ namespace BukyBookWeb.IRepository
         Task UpdateProductAsync(Product product);
         Task DeleteProductAsync(int id);
         Task<IEnumerable<Category>> GetCategoriesAsync();
+        Task<IEnumerable<Author>> GetAllAuthorAsync();
         Task<int> GetTotalProductCountAsync(string search);
     }
 }

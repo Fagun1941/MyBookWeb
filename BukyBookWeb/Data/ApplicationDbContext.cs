@@ -12,6 +12,7 @@ namespace BukyBookWeb.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<Author> Authors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,13 +24,18 @@ namespace BukyBookWeb.Data
                 .HasForeignKey(p => p.CategoryId);
 
             modelBuilder.Entity<Product>()
-        .ToTable("Products", b => b.IsTemporal(
-            t =>
-            {
-                t.HasPeriodStart("ValidFrom");   // Column for row start
-                t.HasPeriodEnd("ValidTo");       // Column for row end
-                t.UseHistoryTable("ProductsHistory"); // History table name
-            }));
+               .HasOne(p => p.Author)
+               .WithMany(c => c.Products)
+               .HasForeignKey(p => p.AuthorId);
+
+            modelBuilder.Entity<Product>()
+                .ToTable("Products", b => b.IsTemporal(
+                    t =>
+                    {
+                        t.HasPeriodStart("ValidFrom");   
+                        t.HasPeriodEnd("ValidTo");       
+                        t.UseHistoryTable("ProductsHistory"); 
+                }));
         }
 
     }

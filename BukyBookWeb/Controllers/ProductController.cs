@@ -53,6 +53,7 @@ namespace BukyBookWeb.Controllers
             try
             {
                 ViewBag.Categories = new SelectList(await _productService.GetCategoriesAsync(), "Id", "Name");
+                ViewBag.Authors = new SelectList(await _productService.GetAllAuthorsAsync(), "AuthorId", "AuthorName");
                 _logger.LogInformation("Opened Create Product page");
                 Response.StatusCode = (int)HttpStatusCode.OK;
                 return View();
@@ -82,8 +83,10 @@ namespace BukyBookWeb.Controllers
                     Response.StatusCode = (int)HttpStatusCode.Created;
                     return RedirectToAction(nameof(Index));
                 }
-
-                _logger.LogWarning("Create Product failed due to invalid model state");
+                var logGuid = Guid.NewGuid();
+                using (LogContext.PushProperty("LogGuid", logGuid))
+                    _logger.LogError("Create Product failed due to invalid model state\" {ProductName} | CorrelationId={LogGuid}", product.Title, logGuid);
+               
                 Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 ViewBag.Categories = new SelectList(await _productService.GetCategoriesAsync(), "Id", "Name", product.CategoryId);
                 return View(product);
@@ -110,7 +113,6 @@ namespace BukyBookWeb.Controllers
                     _logger.LogWarning("Product not found for edit | Id: {Id}", id);
                     return this.HandleError(HttpStatusCode.NotFound, "Product not found");
                 }
-
                 ViewBag.Categories = new SelectList(await _productService.GetCategoriesAsync(), "Id", "Name", product.CategoryId);
                 _logger.LogInformation("Opened Edit page for Product Id: {Id}", id);
                 Response.StatusCode = (int)HttpStatusCode.OK;

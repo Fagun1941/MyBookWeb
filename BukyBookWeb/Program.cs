@@ -69,6 +69,8 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
 
 var app = builder.Build();
 

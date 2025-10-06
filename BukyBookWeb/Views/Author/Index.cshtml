@@ -1,0 +1,75 @@
+﻿@model IEnumerable<Author>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = "Author List";
+    int currentPage = ViewBag.PageNumber;
+    int totalPages = ViewBag.TotalPages;
+    string search = ViewBag.Search;
+}
+<div class="row pt-4 mb-2">
+    <div class="col-6">
+        <h2 class="text-primary">@Localizer["AuthorList"]</h2>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-6 text-end">
+            <a asp-controller="Author" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> &nbsp; Create New Author
+            </a>
+        </div>
+    }
+</div>
+<div class="container p-1">
+    <form asp-controller="Category" asp-action="Index" method="get" class="d-flex mb-3">
+        <input type="text" name="search" class="form-control" placeholder="@Localizer["Searchby"]" value="@search">
+        <button type="submit" class="btn btn-outline-primary ms-2">@Localizer["Search"]</button>
+    </form>
+
+    <div id="categoryGrid" class="grid-container">
+        <div class="grid-row header">
+            <div class="grid-col col-name">@Localizer["AuthorName"]</div>
+           
+            <div class="grid-col col-actions text-center">@Localizer["Action"]</div>
+        </div>
+
+        @foreach (var obj in Model)
+        {
+            <div class="grid-row">
+                <div class="grid-col col-name">@obj.AuthorName</div>
+                
+                <div class="grid-col col-actions text-center">
+                    <div class="btn-group" role="group">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Author" asp-action="Edit" asp-route-id="@obj.AuthorId" class="btn btn-primary btn-sm">
+                                Edit
+                            </a>
+                            <a asp-controller="Author" asp-action="Delete" asp-route-id="@obj.AuthorId" class="btn btn-danger btn-sm">
+                                Delete
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <nav aria-label="Page navigation" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { search = search, page = currentPage - 1 })">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(currentPage == i ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { search = search, page = i })">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { search = search, page = currentPage + 1 })">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
