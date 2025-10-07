@@ -87,7 +87,7 @@ namespace BukyBookWeb.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                    return await Task.FromResult(HandleError(HttpStatusCode.BadRequest, "Invalid login data", model));
+                    return View(model);
 
                 var result = await _accountService.LoginAsync(model);
 
