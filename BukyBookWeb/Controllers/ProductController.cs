@@ -21,11 +21,11 @@ namespace BukyBookWeb.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index(string? search, int page = 1)
+        public async Task<IActionResult> Index(string? search, int page = 1,  int pageSize = 3)
         {
             try
             {
-                int pageSize = 3;
+               
                 var products = await _productService.GetAllProductAsync(search, page, pageSize);
                 int totalProducts = await _productService.GetTotalCountProductAsync(search);
 
